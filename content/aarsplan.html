@@ -212,6 +212,71 @@
   .lib-add:hover { border-color: var(--accent); color: var(--accent); }
   .lib-list { display: flex; flex-direction: column; }
 
+  /* Årsplanbibliotek */
+  .lib-divider { height: 1px; background: var(--line); margin: 28px 0 22px; }
+  .plan-actions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .plan-actions .btn { width: 100%; }
+  .plan-list { display: flex; flex-direction: column; gap: 8px; }
+  .plan-empty { font-size: 12px; color: var(--ink-3); font-style: italic; padding: 4px 0; }
+  .plan-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .plan-item:hover { border-color: var(--line-2); background: var(--surface-2); }
+  .plan-item.active { border-color: var(--accent); background: var(--accent-light); }
+  .plan-item-main { flex: 1; min-width: 0; }
+  .plan-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .plan-item-meta { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+  .plan-item-del {
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    color: var(--ink-3);
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px 7px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .plan-item-del:hover { color: var(--rust); background: rgba(184, 68, 44, 0.1); }
+  .plan-item-edit {
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    color: var(--ink-3);
+    font-size: 13px;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .plan-item-edit:hover { color: var(--accent); background: var(--accent-light); }
+  .plan-rename-input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 10px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    outline: none;
+    color: var(--ink);
+    background: #fff;
+  }
+
   .lib-group {
     border-bottom: 1px solid var(--line);
   }
@@ -900,6 +965,7 @@
   </div>
   <div class="config-actions">
     <button class="btn" id="btn-generate">Generér uger</button>
+    <button class="btn" id="btn-save-plan">Gem årsplan</button>
     <button class="btn btn-primary" id="btn-export">Eksportér PDF</button>
   </div>
 </section>
@@ -914,6 +980,19 @@
     <p class="lib-sub">Klik et fag for at folde det ud. Træk et forløb over på en uge — Fælles Mål følger automatisk med.</p>
     <div class="lib-status" id="lib-status" hidden></div>
     <div class="lib-list" id="lib-list"></div>
+
+    <div class="lib-divider"></div>
+
+    <div class="lib-header">
+      <span class="lib-title">Årsplanbibliotek</span>
+      <span class="lib-count" id="plan-lib-count">0 planer</span>
+    </div>
+    <p class="lib-sub">Gem hele din årsplan med <strong>Gem årsplan</strong> i topmenuen, og åbn den igen her for at redigere eller genbruge den.</p>
+    <div class="plan-actions">
+      <button class="btn" id="btn-save-plan-as" style="display:none">Gem som ny kopi</button>
+    </div>
+    <div class="lib-status" id="plan-lib-status" hidden></div>
+    <div class="plan-list" id="plan-lib-list"></div>
   </aside>
 
   <section class="weeks">
@@ -1204,6 +1283,11 @@ const fagColor = (fag) => ({
 let library = [];
 let libraryLoaded = false;
 let weeks = [];
+
+// Årsplanbibliotek state
+let planLibrary = [];
+let currentPlanId = null;
+let currentPlanTitle = null;
 let editingId = null;
 let pickerWeekIdx = null;
 let expandedFag = null;
@@ -1955,10 +2039,279 @@ document.getElementById('btn-export').addEventListener('click', async () => {
 });
 
 //------------------------------------------------------
+// ÅRSPLANBIBLIOTEK (save / load / rename whole plans)
+//------------------------------------------------------
+
+function setPlanStatus(message, isError) {
+  const el = document.getElementById('plan-lib-status');
+  if (!el) return;
+  el.textContent = message;
+  el.classList.toggle('error', !!isError);
+  el.hidden = false;
+}
+function clearPlanStatus() {
+  const el = document.getElementById('plan-lib-status');
+  if (el) el.hidden = true;
+}
+
+// Skoleår ud fra startår, fx 2025 -> "2025/26".
+function skoleaar(startAar) {
+  const y = parseInt(startAar, 10);
+  if (isNaN(y)) return '';
+  return `${y}/${String(y + 1).slice(2)}`;
+}
+// Auto-titel når brugeren ikke har givet et eget navn.
+function autoPlanTitle(fag, klasse, startAar) {
+  return [fag, klasse, skoleaar(startAar)].filter(Boolean).join(' · ') || 'Unavngivet årsplan';
+}
+function planDisplayTitle(p) {
+  return (p.title || '').trim() || autoPlanTitle(p.fag, p.klasse, p.start_aar);
+}
+
+// Saml den nuværende årsplan til et API-payload (matcher aarsplaner-skemaet).
+function capturePlan() {
+  return {
+    fag: document.getElementById('cfg-fag').value,
+    klasse: document.getElementById('cfg-klasse').value,
+    start_uge: parseInt(document.getElementById('cfg-start').value, 10) || 0,
+    slut_uge: parseInt(document.getElementById('cfg-end').value, 10) || 0,
+    start_aar: parseInt(document.getElementById('cfg-year').value, 10) || 0,
+    weeks: weeks.map(w => ({
+      uge: w.uge, year: w.year,
+      content: w.content || null,
+      fællesMålOverride: w.fællesMålOverride || null,
+    })),
+  };
+}
+
+// Indlæs en gemt årsplan i editoren.
+function applyPlan(plan) {
+  document.getElementById('cfg-fag').value = plan.fag || 'Dansk';
+  document.getElementById('cfg-klasse').value = plan.klasse || '';
+  if (plan.start_uge) document.getElementById('cfg-start').value = plan.start_uge;
+  if (plan.slut_uge) document.getElementById('cfg-end').value = plan.slut_uge;
+  if (plan.start_aar) document.getElementById('cfg-year').value = plan.start_aar;
+  // Seed weeks så generateWeeks overfører placeringerne via uge/year.
+  weeks = (Array.isArray(plan.weeks) ? plan.weeks : []).map(w => ({
+    uge: w.uge, year: w.year,
+    content: w.content || null,
+    fællesMålOverride: w.fællesMålOverride || null,
+  }));
+  expandedFag = document.getElementById('cfg-fag').value;
+  generateWeeks();
+  renderLibrary();
+  const y = parseInt(plan.start_aar, 10);
+  const hm = document.getElementById('header-meta');
+  if (hm && !isNaN(y)) hm.textContent = `Skoleåret ${y}/${String(y + 1).slice(2)}`;
+}
+
+function fmtPlanDate(iso) {
+  try {
+    return new Date(iso).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch (e) { return ''; }
+}
+
+async function loadPlanLibrary() {
+  setPlanStatus('Indlæser…', false);
+  try {
+    planLibrary = await forloebApi('/api/aarsplaner');
+    clearPlanStatus();
+    renderPlanLibrary();
+  } catch (e) {
+    if (e.message === 'unauthorized') return;
+    setPlanStatus('Kunne ikke indlæse årsplaner.', true);
+  }
+}
+
+function updateSaveButtons() {
+  const saveBtn = document.getElementById('btn-save-plan');
+  const asBtn = document.getElementById('btn-save-plan-as');
+  if (saveBtn) saveBtn.textContent = currentPlanId ? 'Gem ændringer' : 'Gem årsplan';
+  if (asBtn) asBtn.style.display = currentPlanId ? '' : 'none';
+}
+
+function renderPlanLibrary() {
+  const list = document.getElementById('plan-lib-list');
+  list.innerHTML = '';
+  const count = planLibrary.length;
+  document.getElementById('plan-lib-count').textContent = `${count} ${count === 1 ? 'plan' : 'planer'}`;
+  updateSaveButtons();
+
+  if (count === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'plan-empty';
+    empty.textContent = 'Ingen gemte årsplaner endnu.';
+    list.appendChild(empty);
+    return;
+  }
+
+  planLibrary.forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'plan-item' + (p.id === currentPlanId ? ' active' : '');
+
+    const main = document.createElement('div');
+    main.className = 'plan-item-main';
+    const title = document.createElement('div');
+    title.className = 'plan-item-title';
+    title.textContent = planDisplayTitle(p);
+    const meta = document.createElement('div');
+    meta.className = 'plan-item-meta';
+    meta.textContent = 'Senest ændret ' + fmtPlanDate(p.updated_at);
+    main.appendChild(title);
+    main.appendChild(meta);
+    main.addEventListener('click', () => openPlan(p.id));
+
+    const rename = document.createElement('button');
+    rename.className = 'plan-item-edit';
+    rename.title = 'Omdøb';
+    rename.textContent = '✎';
+    rename.addEventListener('click', (ev) => { ev.stopPropagation(); startRename(item, p); });
+
+    const del = document.createElement('button');
+    del.className = 'plan-item-del';
+    del.title = 'Slet';
+    del.innerHTML = '&times;';
+    del.addEventListener('click', (ev) => { ev.stopPropagation(); deletePlan(p.id, planDisplayTitle(p)); });
+
+    item.appendChild(main);
+    item.appendChild(rename);
+    item.appendChild(del);
+    list.appendChild(item);
+  });
+}
+
+// Inline omdøbning: erstat titlen med et input, gem på Enter/blur, fortryd på Esc.
+function startRename(item, p) {
+  const input = document.createElement('input');
+  input.className = 'plan-rename-input';
+  input.value = planDisplayTitle(p);
+  input.setAttribute('aria-label', 'Nyt navn');
+  item.innerHTML = '';
+  item.appendChild(input);
+  input.focus();
+  input.select();
+  let done = false;
+  const commit = async (save) => {
+    if (done) return;
+    done = true;
+    if (save) {
+      const newTitle = input.value.trim();
+      try {
+        // Tomt navn => server gemmer null => falder tilbage til auto-titlen.
+        await forloebApi('/api/aarsplaner/' + p.id, {
+          method: 'PATCH', body: JSON.stringify({ title: newTitle }),
+        });
+        if (p.id === currentPlanId) currentPlanTitle = newTitle || null;
+      } catch (e) {
+        if (e.message !== 'unauthorized') setPlanStatus('Kunne ikke omdøbe.', true);
+      }
+    }
+    await loadPlanLibrary();
+  };
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); commit(true); }
+    else if (e.key === 'Escape') { e.preventDefault(); commit(false); }
+  });
+  input.addEventListener('blur', () => commit(true));
+}
+
+async function openPlan(id) {
+  setPlanStatus('Åbner…', false);
+  try {
+    const plan = await forloebApi('/api/aarsplaner/' + id);
+    applyPlan(plan);
+    currentPlanId = plan.id;
+    currentPlanTitle = plan.title || null;
+    setPlanStatus('Åbnet: ' + planDisplayTitle(plan), false);
+    renderPlanLibrary();
+  } catch (e) {
+    if (e.message === 'unauthorized') return;
+    setPlanStatus('Kunne ikke åbne årsplanen.', true);
+  }
+}
+
+async function savePlan() {
+  const saveBtn = document.getElementById('btn-save-plan');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Gemmer…'; }
+  try {
+    if (currentPlanId) {
+      // Gem ændringer på den aktive plan.
+      const updated = await forloebApi('/api/aarsplaner/' + currentPlanId, {
+        method: 'PATCH', body: JSON.stringify(capturePlan()),
+      });
+      currentPlanTitle = updated.title || null;
+      setPlanStatus('Gemt: ' + planDisplayTitle(updated), false);
+    } else {
+      // Ny plan: foreslå "Fag · Klasse · År", som brugeren kan redigere.
+      const fag = document.getElementById('cfg-fag').value;
+      const klasse = document.getElementById('cfg-klasse').value;
+      const aar = document.getElementById('cfg-year').value;
+      const name = window.prompt('Navngiv din årsplan:', autoPlanTitle(fag, klasse, aar));
+      if (name === null) return; // annulleret
+      const payload = capturePlan();
+      payload.title = name.trim(); // tomt => server gemmer null (auto-titel)
+      const created = await forloebApi('/api/aarsplaner', {
+        method: 'POST', body: JSON.stringify(payload),
+      });
+      currentPlanId = created.id;
+      currentPlanTitle = created.title || null;
+      setPlanStatus('Gemt: ' + planDisplayTitle(created), false);
+    }
+    await loadPlanLibrary();
+  } catch (e) {
+    if (e.message !== 'unauthorized') setPlanStatus('Kunne ikke gemme årsplanen.', true);
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+    updateSaveButtons();
+  }
+}
+
+async function savePlanAs() {
+  const base = currentPlanTitle
+    ? currentPlanTitle + ' (kopi)'
+    : autoPlanTitle(
+        document.getElementById('cfg-fag').value,
+        document.getElementById('cfg-klasse').value,
+        document.getElementById('cfg-year').value
+      );
+  const name = window.prompt('Navngiv den nye årsplan:', base);
+  if (name === null) return;
+  try {
+    const payload = capturePlan();
+    payload.title = name.trim();
+    const created = await forloebApi('/api/aarsplaner', {
+      method: 'POST', body: JSON.stringify(payload),
+    });
+    currentPlanId = created.id;
+    currentPlanTitle = created.title || null;
+    setPlanStatus('Gemt: ' + planDisplayTitle(created), false);
+    await loadPlanLibrary();
+  } catch (e) {
+    if (e.message !== 'unauthorized') setPlanStatus('Kunne ikke gemme kopien.', true);
+  }
+}
+
+async function deletePlan(id, title) {
+  if (!confirm(`Slet årsplanen "${title}"? Dette kan ikke fortrydes.`)) return;
+  try {
+    await forloebApi('/api/aarsplaner/' + id, { method: 'DELETE' });
+    if (id === currentPlanId) { currentPlanId = null; currentPlanTitle = null; }
+    await loadPlanLibrary();
+  } catch (e) {
+    if (e.message !== 'unauthorized') setPlanStatus('Kunne ikke slette årsplanen.', true);
+  }
+}
+
+//------------------------------------------------------
 // WIRE UP
 //------------------------------------------------------
 
 document.getElementById('btn-generate').addEventListener('click', generateWeeks);
+document.getElementById('btn-save-plan').addEventListener('click', savePlan);
+(function () {
+  const asBtn = document.getElementById('btn-save-plan-as');
+  if (asBtn) asBtn.addEventListener('click', savePlanAs);
+})();
 document.getElementById('cfg-fag').addEventListener('change', () => {
   expandedFag = document.getElementById('cfg-fag').value;
   updateMeta();
@@ -1980,6 +2333,8 @@ generateWeeks();
 renderLibrary();
 // Hent brugerens forløb fra Supabase (gentegner biblioteket og ugerne).
 loadLibrary();
+// Hent brugerens gemte årsplaner.
+loadPlanLibrary();
 </script>
 
 </body>

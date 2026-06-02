@@ -4,9 +4,9 @@
    Årsplanen design tokens — matched to public/aarsplan-demo.html
 ------------------------------------------------------------------ */
 :root {
-  --bg: #f2ede2;
-  --surface: #faf7ef;
-  --surface-2: #ede7d6;
+  --bg: #e6f1f1;
+  --surface: #fbfbfa;
+  --surface-2: #e0ecec;
   --ink: #1c1b17;
   --ink-2: #5c574c;
   --ink-3: #8b8472;
@@ -24,7 +24,10 @@
   --cyan: #1d8aa0;
   --indigo: #3b4ea6;
   --teal-light: #d5e2e2;
+  /* decorative gradient (with bright cyan) — for non-text accents only */
   --grad-cool: linear-gradient(120deg, var(--teal), var(--cyan) 52%, var(--indigo));
+  /* darker gradient for elements with white text on top (good contrast) */
+  --grad-strong: linear-gradient(120deg, var(--teal), var(--indigo));
 }
 
 @theme inline {
@@ -109,11 +112,12 @@ body {
   background: var(--surface-2);
 }
 .btn-primary {
-  background: var(--grad-cool);
+  background: var(--grad-strong);
   background-size: 160% 160%;
   color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
   border-color: transparent;
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--cyan) 32%, transparent);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--teal) 34%, transparent);
   transition: background-position 0.5s ease, box-shadow 0.2s ease,
     transform 0.2s ease;
 }
@@ -204,7 +208,7 @@ body::before {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: #fff;
-  background: var(--grad-cool);
+  background: var(--grad-strong);
   background-size: 180% 180%;
   padding: 6px 14px;
   border-radius: 20px;
@@ -371,13 +375,13 @@ body::before {
   width: 36px;
   height: 36px;
   border-radius: 9px;
-  background: var(--grad-cool);
+  background: var(--grad-strong);
   color: #fff;
   font-family: var(--font-lora), "Lora", serif;
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 16px;
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--cyan) 28%, transparent);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--teal) 26%, transparent);
 }
 .feature-card h3 {
   position: relative;
