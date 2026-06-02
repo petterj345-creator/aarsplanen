@@ -48,9 +48,6 @@ export default function Home() {
             <Link href="/login" className="btn btn-primary btn-lg">
               Log ind og kom i gang
             </Link>
-            <a href="/aarsplan-demo.html" className="btn btn-lg">
-              Se en demo
-            </a>
           </div>
           <p className="hero-note">
             Ingen installation — alt foregår i browseren.

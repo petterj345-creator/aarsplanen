@@ -2,19 +2,32 @@
 
 import Link from "next/link";
 import { useState } from "react";
-
-// Hvor "værktøjet" lever. Pt. den eksisterende statiske demo i public/.
-// Skift denne sti, når værktøjet flyttes ind i appen (f.eks. "/planlaegger").
-const TOOL_URL = "/aarsplan-demo.html";
+import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const configured = isSupabaseConfigured();
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // Ingen rigtig authentication endnu — før brugeren direkte ind i værktøjet.
-    window.location.href = TOOL_URL;
+    setError(null);
+    setLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      setError("Forkert e-mail eller adgangskode.");
+      setLoading(false);
+      return;
+    }
+    // Full navigation so the new session cookie is picked up server-side.
+    window.location.href = "/vaerktoej";
   }
 
   return (
@@ -35,6 +48,15 @@ export default function LoginPage() {
           <p className="login-sub">
             Log ind for at åbne dine årsplaner og forløbsbibliotek.
           </p>
+
+          {!configured && (
+            <p
+              className="login-sub"
+              style={{ color: "var(--rust)", fontWeight: 500 }}
+            >
+              Login er ikke konfigureret endnu (mangler Supabase-nøgler).
+            </p>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="login-field">
@@ -61,13 +83,30 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <button type="submit" className="btn btn-primary login-submit">
-              Log ind
+
+            {error && (
+              <p
+                style={{
+                  color: "var(--rust)",
+                  fontSize: "13px",
+                  marginBottom: "12px",
+                }}
+              >
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="btn btn-primary login-submit"
+              disabled={loading || !configured}
+            >
+              {loading ? "Logger ind…" : "Log ind"}
             </button>
           </form>
 
           <p className="login-meta">
-            Har du ikke en konto? <Link href="/login">Opret dig her</Link>
+            Har du ikke en konto? Kontakt din administrator.
           </p>
         </div>
       </main>

@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  // Ensure the tool HTML (read at runtime by app/vaerktoej) is bundled with
+  // the serverless function in production.
+  outputFileTracingIncludes: {
+    "/vaerktoej": ["./content/**"],
+  },
 };
 
 export default nextConfig;

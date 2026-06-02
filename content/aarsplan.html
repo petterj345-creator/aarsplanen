@@ -1777,7 +1777,6 @@ function buildPdfHtml() {
   const klasse = document.getElementById('cfg-klasse').value;
   const year = document.getElementById('cfg-year').value;
   const laerer = document.getElementById('cfg-laerer').value.trim();
-  const dato = new Date().toLocaleDateString('da-DK', { day:'numeric', month:'long', year:'numeric' });
 
   const laererSpan = laerer
     ? `<span><strong>Lærer:</strong> ${escapeHtml(laerer)}</span>`
@@ -1790,7 +1789,6 @@ function buildPdfHtml() {
         ${laererSpan}
         <span><strong>Skoleår:</strong> ${year}/${parseInt(year)+1}</span>
         <span><strong>Uger:</strong> ${weeks[0]?.uge}–${weeks[weeks.length-1]?.uge}</span>
-        <span><strong>Udskrevet:</strong> ${dato}</span>
       </div>
     </div>
   `;
