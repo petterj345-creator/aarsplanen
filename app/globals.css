@@ -157,40 +157,44 @@ body::before {
   text-align: center;
   z-index: 0;
 }
-/* Drifting coloured glows floating behind the hero */
+/* Soft, symmetric ambient glow behind the hero. Centred and concentric so
+   the colours blend evenly behind the headline instead of looking offset. */
 .hero::before,
 .hero::after {
   content: "";
   position: absolute;
-  border-radius: 50%;
-  filter: blur(72px);
+  top: -40px;
+  left: 50%;
   z-index: -1;
   pointer-events: none;
-  will-change: transform;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  will-change: transform, opacity;
 }
+/* core glow — cyan fading to a hint of indigo, centre-out */
 .hero::before {
-  width: 520px;
-  height: 520px;
-  top: -130px;
-  left: -90px;
+  width: min(760px, 94%);
+  height: 440px;
   background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--cyan) 40%, transparent),
-    transparent 70%
+    ellipse at center,
+    color-mix(in srgb, var(--cyan) 20%, transparent),
+    color-mix(in srgb, var(--indigo) 10%, transparent) 46%,
+    transparent 72%
   );
-  animation: floatA 16s ease-in-out infinite;
+  filter: blur(58px);
+  animation: glowPulse 10s ease-in-out infinite;
 }
+/* wider, fainter halo for a gentle falloff */
 .hero::after {
-  width: 460px;
-  height: 460px;
-  top: -60px;
-  right: -100px;
+  width: min(920px, 100%);
+  height: 520px;
   background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--indigo) 36%, transparent),
-    transparent 70%
+    ellipse at center,
+    color-mix(in srgb, var(--teal) 10%, transparent),
+    transparent 68%
   );
-  animation: floatB 19s ease-in-out infinite;
+  filter: blur(76px);
+  animation: glowPulse 13s ease-in-out infinite reverse;
 }
 .hero-eyebrow {
   display: inline-flex;
@@ -290,7 +294,7 @@ body::before {
 }
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 18px;
 }
 /* Glassmorphic cards on a single cohesive cool accent */
@@ -318,6 +322,12 @@ body::before {
 }
 .feature-card:nth-child(4) {
   animation-delay: 0.26s;
+}
+.feature-card:nth-child(5) {
+  animation-delay: 0.33s;
+}
+.feature-card:nth-child(6) {
+  animation-delay: 0.4s;
 }
 /* gradient top accent bar */
 .feature-card::before {
@@ -387,22 +397,15 @@ body::before {
 }
 
 /* ---------- Landing motion ---------- */
-@keyframes floatA {
+@keyframes glowPulse {
   0%,
   100% {
-    transform: translate(0, 0) scale(1);
+    opacity: 0.85;
+    transform: translateX(-50%) scale(1);
   }
   50% {
-    transform: translate(46px, 32px) scale(1.08);
-  }
-}
-@keyframes floatB {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(-52px, 24px) scale(1.1);
+    opacity: 1;
+    transform: translateX(-50%) scale(1.06);
   }
 }
 @keyframes hueShift {
@@ -568,20 +571,19 @@ body::before {
   .features {
     padding: 16px 24px 72px;
   }
+  /* two across on iPad keeps the 6 cards balanced (3 rows of 2) */
   .feature-grid {
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 14px;
   }
-  /* keep the glows from spilling too wide on narrower screens */
+  /* keep the centred glow from spilling on narrower screens */
   .hero::before {
-    width: 380px;
     height: 380px;
-    left: -120px;
+    filter: blur(52px);
   }
   .hero::after {
-    width: 340px;
-    height: 340px;
-    right: -120px;
+    height: 420px;
+    filter: blur(66px);
   }
 }
 
@@ -624,11 +626,14 @@ body::before {
     grid-template-columns: 1fr;
     gap: 14px;
   }
-  /* lighter glows on small screens (perf + less visual noise) */
-  .hero::before,
+  /* lighter glow on phones (perf + less visual noise) */
+  .hero::before {
+    height: 320px;
+    filter: blur(46px);
+  }
   .hero::after {
-    filter: blur(58px);
-    opacity: 0.75;
+    height: 360px;
+    filter: blur(60px);
   }
   .login-wrap {
     padding: 32px 16px;

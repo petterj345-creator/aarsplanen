@@ -17,6 +17,14 @@ const features = [
     title: "Eksportér som PDF",
     body: "Få en ren, printklar årsplan, du kan dele med kolleger, ledelse og forældre — eller arkivere som dokumentation for årets undervisning.",
   },
+  {
+    title: "Genbrug år efter år",
+    body: "Dine forløb og planer gemmes automatisk. Kopiér sidste års plan og justér den i stedet for at starte forfra, hver gang et nyt skoleår begynder.",
+  },
+  {
+    title: "Overblik over hele året",
+    body: "Se ferier, emneuger og fagfordeling på én side, så du hurtigt opdager huller og overlap, før skoleåret for alvor går i gang.",
+  },
 ];
 
 export default function Home() {
