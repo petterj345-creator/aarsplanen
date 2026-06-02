@@ -721,10 +721,16 @@
   }
   
   /* PDF */
-  .pdf-container {
+  /* Off-screen wrapper hides the PDF source. The wrapper is positioned, NOT
+     the .pdf-container itself — html2pdf clones the container, and an absolutely
+     positioned source collapses to height 0 in the clone (blank PDF). */
+  .pdf-offscreen {
     position: absolute;
     left: -10000px;
     top: 0;
+    width: 794px;
+  }
+  .pdf-container {
     width: 794px;
     background: white;
     color: #1A1814;
@@ -956,7 +962,7 @@
   </div>
 </div>
 
-<div class="pdf-container" id="pdf-container"></div>
+<div class="pdf-offscreen"><div class="pdf-container" id="pdf-container"></div></div>
 
 <script>
 //------------------------------------------------------
@@ -1840,7 +1846,7 @@ document.getElementById('btn-export').addEventListener('click', async () => {
   const opts = {
     margin: [14, 0, 14, 0], filename,
     image: { type:'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 794 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
     jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
     pagebreak: { mode:['css','legacy'], avoid:'.pdf-week' }
   };
@@ -1850,10 +1856,6 @@ document.getElementById('btn-export').addEventListener('click', async () => {
   btn.textContent = 'Genererer…';
   btn.disabled = true;
 
-  // Move the PDF source into the page coordinate space before capturing.
-  // html2canvas renders elements parked far off-screen (left:-10000px) as a
-  // blank canvas, which is why the export came out empty.
-  pdfEl.style.left = '0';
   try {
     // Wait for the web fonts so headings/text aren't dropped from the canvas.
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
@@ -1862,7 +1864,6 @@ document.getElementById('btn-export').addEventListener('click', async () => {
     console.error(err);
     alert('Kunne ikke generere PDF: ' + err.message);
   } finally {
-    pdfEl.style.left = '-10000px';
     btn.textContent = orig;
     btn.disabled = false;
   }
