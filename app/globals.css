@@ -58,11 +58,18 @@
   box-sizing: border-box;
 }
 
+html {
+  background: var(--bg);
+}
 html,
 body {
-  background: var(--bg);
   color: var(--ink);
   overflow-x: hidden;
+}
+/* Transparent so the fixed .landing-bg shows through on the landing page.
+   Non-landing pages (login) have no .landing-bg, so they show html's clean bg. */
+body {
+  background: transparent;
 }
 
 body {
@@ -157,26 +164,31 @@ body {
   z-index: -1;
   pointer-events: none;
   background: radial-gradient(
-      ellipse 60% 50% at 10% 0%,
-      rgba(251, 224, 213, 0.5),
-      transparent 60%
+      ellipse 90% 75% at 5% 0%,
+      rgba(249, 200, 178, 0.85),
+      transparent 66%
     ),
     radial-gradient(
-      ellipse 50% 60% at 90% 20%,
-      rgba(216, 204, 236, 0.5),
-      transparent 65%
+      ellipse 85% 80% at 95% 14%,
+      rgba(203, 184, 238, 0.85),
+      transparent 68%
     ),
     radial-gradient(
-      ellipse 60% 50% at 80% 100%,
-      rgba(204, 229, 220, 0.4),
-      transparent 60%
+      ellipse 90% 75% at 93% 100%,
+      rgba(183, 226, 204, 0.78),
+      transparent 66%
     ),
     radial-gradient(
-      ellipse 50% 50% at 20% 90%,
-      rgba(207, 224, 239, 0.5),
-      transparent 60%
+      ellipse 85% 78% at 7% 94%,
+      rgba(184, 214, 245, 0.85),
+      transparent 66%
     ),
-    #fafaf5;
+    radial-gradient(
+      ellipse 80% 65% at 50% 50%,
+      rgba(212, 198, 236, 0.4),
+      transparent 72%
+    ),
+    #f6f4ec;
 }
 
 .hero {
