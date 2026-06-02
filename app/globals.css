@@ -19,14 +19,12 @@
   --radius: 6px;
   --radius-lg: 10px;
 
-  /* Lively multi-accent palette for the landing page */
+  /* Cohesive cool "futuristic" accent ramp for the landing page */
   --teal: #1f4e5f;
+  --cyan: #1d8aa0;
+  --indigo: #3b4ea6;
   --teal-light: #d5e2e2;
-  --amber: #bf7d18;
-  --amber-light: #f4e6c6;
-  --green: #3f7d5c;
-  --green-light: #d8e8de;
-  --rust-light: #f4ddd4;
+  --grad-cool: linear-gradient(120deg, var(--teal), var(--cyan) 52%, var(--indigo));
 }
 
 @theme inline {
@@ -111,15 +109,18 @@ body {
   background: var(--surface-2);
 }
 .btn-primary {
-  background: linear-gradient(120deg, var(--teal), var(--green));
+  background: var(--grad-cool);
+  background-size: 160% 160%;
   color: #fff;
   border-color: transparent;
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--teal) 30%, transparent);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--cyan) 32%, transparent);
+  transition: background-position 0.5s ease, box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 .btn-primary:hover {
-  background: linear-gradient(120deg, var(--accent-2), var(--green));
-  box-shadow: 0 10px 26px color-mix(in srgb, var(--teal) 40%, transparent);
-  transform: translateY(-1px);
+  background-position: 100% 0;
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--cyan) 45%, transparent);
+  transform: translateY(-2px);
 }
 .btn-lg {
   padding: 13px 26px;
@@ -127,6 +128,27 @@ body {
 }
 
 /* ---------- Landing ---------- */
+/* Faint futuristic grid wash, fading out toward the edges */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image: linear-gradient(
+      color-mix(in srgb, var(--cyan) 8%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--cyan) 8%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(circle at 50% 18%, #000, transparent 60%);
+  mask-image: radial-gradient(circle at 50% 18%, #000, transparent 60%);
+}
+
 .hero {
   position: relative;
   padding: 92px 36px 76px;
@@ -135,50 +157,66 @@ body {
   text-align: center;
   z-index: 0;
 }
-/* Soft coloured glows floating behind the hero for a lively, premium feel */
+/* Drifting coloured glows floating behind the hero */
 .hero::before,
 .hero::after {
   content: "";
   position: absolute;
   border-radius: 50%;
-  filter: blur(70px);
+  filter: blur(72px);
   z-index: -1;
   pointer-events: none;
+  will-change: transform;
 }
 .hero::before {
   width: 520px;
   height: 520px;
-  top: -120px;
-  left: -80px;
+  top: -130px;
+  left: -90px;
   background: radial-gradient(
     circle,
-    color-mix(in srgb, var(--teal) 42%, transparent),
+    color-mix(in srgb, var(--cyan) 40%, transparent),
     transparent 70%
   );
+  animation: floatA 16s ease-in-out infinite;
 }
 .hero::after {
   width: 460px;
   height: 460px;
-  top: -40px;
-  right: -90px;
+  top: -60px;
+  right: -100px;
   background: radial-gradient(
     circle,
-    color-mix(in srgb, var(--amber) 38%, transparent),
+    color-mix(in srgb, var(--indigo) 36%, transparent),
     transparent 70%
   );
+  animation: floatB 19s ease-in-out infinite;
 }
 .hero-eyebrow {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: #fff;
-  background: linear-gradient(120deg, var(--teal), var(--green));
+  background: var(--grad-cool);
+  background-size: 180% 180%;
   padding: 6px 14px;
   border-radius: 20px;
   margin-bottom: 24px;
   font-weight: 600;
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--teal) 35%, transparent);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--cyan) 35%, transparent);
+  animation: shimmer 6s ease infinite, riseIn 0.6s ease both;
+}
+/* pulsing "live" dot */
+.hero-eyebrow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  animation: pulse 2.2s ease-out infinite;
 }
 .hero-title {
   font-family: var(--font-lora), "Lora", serif;
@@ -188,13 +226,23 @@ body {
   letter-spacing: -0.025em;
   margin: 0 0 22px;
   color: var(--ink);
+  animation: riseIn 0.6s ease 0.05s both;
 }
 .hero-title em {
   font-style: normal;
-  background: linear-gradient(120deg, var(--teal), var(--green) 55%, var(--amber));
+  background: linear-gradient(
+    100deg,
+    var(--teal),
+    var(--cyan),
+    var(--indigo),
+    var(--cyan),
+    var(--teal)
+  );
+  background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  animation: hueShift 7s linear infinite;
 }
 .hero-lead {
   font-size: clamp(16px, 2.2vw, 19px);
@@ -202,21 +250,25 @@ body {
   color: var(--ink-2);
   max-width: 620px;
   margin: 0 auto 34px;
+  animation: riseIn 0.6s ease 0.12s both;
 }
 .hero-actions {
   display: flex;
   gap: 14px;
   justify-content: center;
   flex-wrap: wrap;
+  animation: riseIn 0.6s ease 0.18s both;
 }
 .hero-note {
   margin-top: 18px;
   font-size: 13px;
   color: var(--ink-3);
+  animation: riseIn 0.6s ease 0.24s both;
 }
 
 /* ---------- Feature grid ---------- */
 .features {
+  position: relative;
   max-width: 1040px;
   margin: 0 auto;
   padding: 24px 36px 96px;
@@ -241,72 +293,169 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 18px;
 }
+/* Glassmorphic cards on a single cohesive cool accent */
 .feature-card {
-  --card-accent: var(--teal);
-  --card-accent-light: var(--teal-light);
   position: relative;
   overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in srgb, var(--cyan) 16%, var(--line));
   border-radius: var(--radius-lg);
   padding: 28px 24px 26px;
-  transition: all 0.18s;
+  transition: transform 0.22s ease, box-shadow 0.22s ease,
+    border-color 0.22s ease;
+  animation: riseIn 0.55s ease both;
 }
-/* Coloured top accent bar — a different colour per card */
+.feature-card:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.feature-card:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.feature-card:nth-child(3) {
+  animation-delay: 0.19s;
+}
+.feature-card:nth-child(4) {
+  animation-delay: 0.26s;
+}
+/* gradient top accent bar */
 .feature-card::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 4px;
-  background: var(--card-accent);
-  opacity: 0.9;
+  height: 3px;
+  background: var(--grad-cool);
+  z-index: 2;
 }
-.feature-card:nth-child(4n + 1) {
-  --card-accent: var(--teal);
-  --card-accent-light: var(--teal-light);
-}
-.feature-card:nth-child(4n + 2) {
-  --card-accent: var(--amber);
-  --card-accent-light: var(--amber-light);
-}
-.feature-card:nth-child(4n + 3) {
-  --card-accent: var(--rust);
-  --card-accent-light: var(--rust-light);
-}
-.feature-card:nth-child(4n + 4) {
-  --card-accent: var(--green);
-  --card-accent-light: var(--green-light);
+/* light sweep that crosses the card on hover */
+.feature-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    color-mix(in srgb, var(--cyan) 14%, transparent) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
 }
 .feature-card:hover {
-  border-color: var(--card-accent);
-  transform: translateY(-3px);
-  box-shadow: 0 14px 30px color-mix(in srgb, var(--card-accent) 22%, transparent);
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--cyan) 55%, transparent);
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--cyan) 20%, transparent);
+}
+.feature-card:hover::after {
+  transform: translateX(100%);
 }
 .feature-num {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
   border-radius: 9px;
-  background: var(--card-accent-light);
-  color: var(--card-accent);
+  background: var(--grad-cool);
+  color: #fff;
   font-family: var(--font-lora), "Lora", serif;
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 16px;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--cyan) 28%, transparent);
 }
 .feature-card h3 {
+  position: relative;
+  z-index: 1;
   font-family: var(--font-lora), "Lora", serif;
   font-size: 18px;
   font-weight: 500;
   margin: 0 0 8px;
 }
 .feature-card p {
+  position: relative;
+  z-index: 1;
   font-size: 13.5px;
   line-height: 1.55;
   color: var(--ink-2);
   margin: 0;
+}
+
+/* ---------- Landing motion ---------- */
+@keyframes floatA {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(46px, 32px) scale(1.08);
+  }
+}
+@keyframes floatB {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-52px, 24px) scale(1.1);
+  }
+}
+@keyframes hueShift {
+  to {
+    background-position: 220% center;
+  }
+}
+@keyframes shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero::before,
+  .hero::after,
+  .hero-eyebrow,
+  .hero-eyebrow::before,
+  .hero-title,
+  .hero-title em,
+  .hero-lead,
+  .hero-actions,
+  .hero-note,
+  .feature-card {
+    animation: none !important;
+  }
+  .feature-card::after {
+    transition: none;
+  }
 }
 
 /* ---------- Footer ---------- */
@@ -402,4 +551,92 @@ body {
 }
 .login-back:hover {
   color: var(--ink);
+}
+
+/* ------------------------------------------------------------------
+   Responsive — tablet / iPad and mobile
+------------------------------------------------------------------ */
+
+/* iPad & smaller laptops */
+@media (max-width: 860px) {
+  .site-header {
+    padding: 18px 24px;
+  }
+  .hero {
+    padding: 64px 24px 54px;
+  }
+  .features {
+    padding: 16px 24px 72px;
+  }
+  .feature-grid {
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+  }
+  /* keep the glows from spilling too wide on narrower screens */
+  .hero::before {
+    width: 380px;
+    height: 380px;
+    left: -120px;
+  }
+  .hero::after {
+    width: 340px;
+    height: 340px;
+    right: -120px;
+  }
+}
+
+/* Phones */
+@media (max-width: 560px) {
+  .site-header {
+    padding: 16px 18px;
+    gap: 12px;
+  }
+  .logo-mark {
+    font-size: 22px;
+  }
+  /* drop the secondary tag to declutter the header on phones */
+  .logo-tag {
+    display: none;
+  }
+  .hero {
+    padding: 44px 18px 40px;
+  }
+  .hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+  }
+  /* stack the CTAs full-width so they're easy to tap */
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-actions .btn {
+    width: 100%;
+  }
+  .features {
+    padding: 12px 18px 60px;
+  }
+  .features-head {
+    margin-bottom: 28px;
+  }
+  /* single column — no cramped cards */
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  /* lighter glows on small screens (perf + less visual noise) */
+  .hero::before,
+  .hero::after {
+    filter: blur(58px);
+    opacity: 0.75;
+  }
+  .login-wrap {
+    padding: 32px 16px;
+  }
+  .login-card {
+    padding: 28px 22px 26px;
+  }
+  .site-footer {
+    padding: 22px 20px;
+  }
 }
