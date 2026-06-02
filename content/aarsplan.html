@@ -937,6 +937,7 @@
       <option value="Tysk">Tysk</option>
       <option value="Historie">Historie</option>
       <option value="N/T">Natur/teknologi</option>
+      <option value="Naturfag">Naturfag</option>
       <option value="Idræt">Idræt</option>
       <option value="Musik">Musik</option>
       <option value="Billedkunst">Billedkunst</option>
@@ -1022,6 +1023,7 @@
           <option value="Tysk">Tysk</option>
           <option value="Historie">Historie</option>
           <option value="N/T">Natur/teknologi</option>
+          <option value="Naturfag">Naturfag</option>
           <option value="Idræt">Idræt</option>
           <option value="Musik">Musik</option>
           <option value="Billedkunst">Billedkunst</option>
@@ -1201,6 +1203,37 @@ const fællesMålData = {
       'Argumentation med data'
     ]
   },
+  // Naturfag: fællesfagligt samarbejde mellem fysik/kemi, biologi og geografi.
+  // Fælles Mål er hentet fra de tre fags kompetenceområder.
+  'Naturfag': {
+    'Fysik/kemi': [
+      'Stof og stofkredsløb',
+      'Partikler, bølger og stråling',
+      'Energiomsætning og energikilder',
+      'Jorden og Universet',
+      'Produktion og teknologi'
+    ],
+    'Biologi': [
+      'Celler, mikrobiologi og bioteknologi',
+      'Krop, sundhed og sygdom',
+      'Evolution og klassifikation',
+      'Økosystemer og økologi',
+      'Anvendelse af naturgrundlaget'
+    ],
+    'Geografi': [
+      'Jordkloden og dens klima',
+      'Pladetektonik og landskabsdannelse',
+      'Naturgrundlag og levevilkår',
+      'Demografi og erhverv',
+      'Globalisering og ressourcer'
+    ],
+    'Fælles naturfaglige kompetencer': [
+      'Naturfaglige undersøgelser og forsøg',
+      'Naturfaglig modellering',
+      'Perspektivering: bæredygtighed og klima',
+      'Naturfaglig formidling og argumentation'
+    ]
+  },
   'Idræt': {
     'Alsidig idrætsudøvelse': [
       'Boldspil og holdspil',
@@ -1263,13 +1296,13 @@ const fællesMålData = {
 
 const fagClass = (fag) => ({
   'Dansk':'fag-dansk','Matematik':'fag-matematik','Engelsk':'fag-engelsk','Tysk':'fag-tysk',
-  'Historie':'fag-historie','N/T':'fag-nt','Idræt':'fag-idræt',
+  'Historie':'fag-historie','N/T':'fag-nt','Naturfag':'fag-naturfag','Idræt':'fag-idræt',
   'Musik':'fag-musik','Billedkunst':'fag-billedkunst','Valgfag':'fag-valgfag','Tværfagligt':'fag-tværfagligt',
   'Alternativt':'fag-alternativt'
 }[fag] || 'fag-tværfagligt');
 const fagColor = (fag) => ({
   'Dansk':'#B8442C','Matematik':'#2C5F7A','Engelsk':'#6B7F3C','Tysk':'#3F4E8F',
-  'Historie':'#A07F2D','N/T':'#3E7F70','Idræt':'#C46A3A',
+  'Historie':'#A07F2D','N/T':'#3E7F70','Naturfag':'#2E7D5B','Idræt':'#C46A3A',
   'Musik':'#7A4E7B','Billedkunst':'#B85B7C','Valgfag':'#2E7E84','Tværfagligt':'#5C574C',
   'Alternativt':'#5A6E78'
 }[fag] || '#5C574C');
@@ -1525,7 +1558,7 @@ function renderLibrary() {
   }
 
   // Standard fag-rækkefølge — viser alle fag, også dem uden forløb endnu
-  const fagOrder = ['Dansk', 'Matematik', 'Engelsk', 'Tysk', 'Historie', 'N/T', 'Idræt', 'Musik', 'Billedkunst', 'Valgfag', 'Tværfagligt', 'Alternativt'];
+  const fagOrder = ['Dansk', 'Matematik', 'Engelsk', 'Tysk', 'Historie', 'N/T', 'Naturfag', 'Idræt', 'Musik', 'Billedkunst', 'Valgfag', 'Tværfagligt', 'Alternativt'];
 
   fagOrder.forEach(fag => {
     const forløbForFag = library.filter(l => l.fag === fag);

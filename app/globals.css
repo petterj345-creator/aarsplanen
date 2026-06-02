@@ -5,7 +5,7 @@
 ------------------------------------------------------------------ */
 :root {
   --bg: #e6f1f1;
-  --surface: #fbfbfa;
+  --surface: #edf5f5;
   --surface-2: #e0ecec;
   --ink: #1c1b17;
   --ink-2: #5c574c;
@@ -28,6 +28,21 @@
   --grad-cool: linear-gradient(120deg, var(--teal), var(--cyan) 52%, var(--indigo));
   /* darker gradient for elements with white text on top (good contrast) */
   --grad-strong: linear-gradient(120deg, var(--teal), var(--indigo));
+
+  /* aurora accent colours — fancy but kept readable */
+  --violet: #6b46c1;
+  --amber: #c98a1c;
+  --pink: #c64f86;
+  /* flowing aurora for big display text (headline accent) */
+  --grad-aurora: linear-gradient(
+    110deg,
+    var(--teal),
+    var(--indigo) 34%,
+    var(--violet) 66%,
+    var(--pink)
+  );
+  /* slightly more colour for white-text badges/pills (still good contrast) */
+  --grad-badge: linear-gradient(120deg, var(--teal), var(--violet));
 }
 
 @theme inline {
@@ -161,44 +176,55 @@ body::before {
   text-align: center;
   z-index: 0;
 }
-/* Soft, symmetric ambient glow behind the hero. Centred and concentric so
-   the colours blend evenly behind the headline instead of looking offset. */
-.hero::before,
+/* Aurora: soft colour orbs (teal / violet / amber) drifting around the hero
+   edges — kept off the centre so the headline stays clean and readable —
+   plus a faint central teal calm. */
+.hero::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  left: -8%;
+  right: -8%;
+  height: 620px;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+      38% 42% at 14% 12%,
+      color-mix(in srgb, var(--teal) 30%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 44% at 86% 6%,
+      color-mix(in srgb, var(--violet) 26%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 42% at 50% 100%,
+      color-mix(in srgb, var(--amber) 18%, transparent),
+      transparent 72%
+    );
+  filter: blur(60px);
+  animation: auroraDrift 22s ease-in-out infinite;
+  will-change: transform, opacity;
+}
 .hero::after {
   content: "";
   position: absolute;
-  top: -40px;
+  top: -10px;
   left: 50%;
+  width: min(640px, 86%);
+  height: 340px;
+  transform: translateX(-50%);
   z-index: -1;
   pointer-events: none;
   border-radius: 50%;
-  transform: translateX(-50%);
-  will-change: transform, opacity;
-}
-/* core glow — cyan fading to a hint of indigo, centre-out */
-.hero::before {
-  width: min(760px, 94%);
-  height: 440px;
   background: radial-gradient(
     ellipse at center,
-    color-mix(in srgb, var(--cyan) 20%, transparent),
-    color-mix(in srgb, var(--indigo) 10%, transparent) 46%,
-    transparent 72%
+    color-mix(in srgb, var(--teal) 12%, transparent),
+    transparent 70%
   );
-  filter: blur(58px);
-  animation: glowPulse 10s ease-in-out infinite;
-}
-/* wider, fainter halo for a gentle falloff */
-.hero::after {
-  width: min(920px, 100%);
-  height: 520px;
-  background: radial-gradient(
-    ellipse at center,
-    color-mix(in srgb, var(--teal) 10%, transparent),
-    transparent 68%
-  );
-  filter: blur(76px);
-  animation: glowPulse 13s ease-in-out infinite reverse;
+  filter: blur(62px);
+  animation: glowPulse 12s ease-in-out infinite;
 }
 .hero-eyebrow {
   display: inline-flex;
@@ -208,7 +234,7 @@ body::before {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: #fff;
-  background: var(--grad-strong);
+  background: var(--grad-badge);
   background-size: 180% 180%;
   padding: 6px 14px;
   border-radius: 20px;
@@ -241,16 +267,18 @@ body::before {
   background: linear-gradient(
     100deg,
     var(--teal),
-    var(--cyan),
     var(--indigo),
-    var(--cyan),
+    var(--violet),
+    var(--pink),
+    var(--violet),
+    var(--indigo),
     var(--teal)
   );
-  background-size: 220% auto;
+  background-size: 260% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: hueShift 7s linear infinite;
+  animation: hueShift 8s linear infinite;
 }
 .hero-lead {
   font-size: clamp(16px, 2.2vw, 19px);
@@ -339,7 +367,7 @@ body::before {
   position: absolute;
   inset: 0 0 auto 0;
   height: 3px;
-  background: var(--grad-cool);
+  background: var(--grad-aurora);
   z-index: 2;
 }
 /* light sweep that crosses the card on hover */
@@ -375,13 +403,13 @@ body::before {
   width: 36px;
   height: 36px;
   border-radius: 9px;
-  background: var(--grad-strong);
+  background: var(--grad-badge);
   color: #fff;
   font-family: var(--font-lora), "Lora", serif;
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 16px;
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--teal) 26%, transparent);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--violet) 24%, transparent);
 }
 .feature-card h3 {
   position: relative;
@@ -410,6 +438,21 @@ body::before {
   50% {
     opacity: 1;
     transform: translateX(-50%) scale(1.06);
+  }
+}
+@keyframes auroraDrift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.9;
+  }
+  33% {
+    transform: translate(2%, 1.5%) scale(1.05);
+    opacity: 1;
+  }
+  66% {
+    transform: translate(-2%, 1%) scale(1.03);
+    opacity: 0.82;
   }
 }
 @keyframes hueShift {
@@ -580,14 +623,14 @@ body::before {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
   }
-  /* keep the centred glow from spilling on narrower screens */
+  /* keep the aurora orbs from spilling on narrower screens */
   .hero::before {
-    height: 380px;
-    filter: blur(52px);
+    height: 480px;
+    filter: blur(54px);
   }
   .hero::after {
-    height: 420px;
-    filter: blur(66px);
+    height: 300px;
+    filter: blur(58px);
   }
 }
 
@@ -630,14 +673,14 @@ body::before {
     grid-template-columns: 1fr;
     gap: 14px;
   }
-  /* lighter glow on phones (perf + less visual noise) */
+  /* lighter aurora on phones (perf + less visual noise) */
   .hero::before {
-    height: 320px;
+    height: 380px;
     filter: blur(46px);
   }
   .hero::after {
-    height: 360px;
-    filter: blur(60px);
+    height: 240px;
+    filter: blur(50px);
   }
   .login-wrap {
     padding: 32px 16px;
