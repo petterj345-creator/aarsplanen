@@ -173,6 +173,29 @@
     margin-bottom: 18px;
     line-height: 1.55;
   }
+  .lib-status {
+    font-size: 12px;
+    color: var(--ink-2);
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.04);
+    line-height: 1.5;
+  }
+  .lib-status.error {
+    color: var(--rust);
+    background: rgba(150,60,30,0.08);
+  }
+  .lib-empty-cta {
+    padding: 22px 16px;
+    text-align: center;
+    color: var(--ink-2);
+  }
+  .lib-empty-cta p {
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 0 0 14px;
+  }
   .lib-add {
     width: 100%;
     margin-bottom: 18px;
@@ -889,6 +912,7 @@
       <span class="lib-count" id="lib-count">0 forløb</span>
     </div>
     <p class="lib-sub">Klik et fag for at folde det ud. Træk et forløb over på en uge — Fælles Mål følger automatisk med.</p>
+    <div class="lib-status" id="lib-status" hidden></div>
     <div class="lib-list" id="lib-list"></div>
   </aside>
 
@@ -1172,49 +1196,13 @@ const fagColor = (fag) => ({
 }[fag] || '#5C574C');
 
 //------------------------------------------------------
-// INITIAL LIBRARY
+// LIBRARY STATE
 //------------------------------------------------------
+// The forløbsbibliotek is loaded per user from Supabase via /api/forloeb.
+// It starts empty and is filled by loadLibrary() on startup.
 
-let library = [
-  { id: 1, title:'H.C. Andersens eventyr', fag:'Dansk', uger:4,
-    beskrivelse:'Læsning og analyse af klassiske eventyr med fokus på fortællestruktur, personkarakteristik og symbolik.',
-    fællesMål:['Læsning', 'Fortolkning', 'Personkarakteristik og fortællerforhold', 'Symboler, temaer og budskab'] },
-  { id: 2, title:'Brøker og decimaltal', fag:'Matematik', uger:3,
-    beskrivelse:'Introduktion til brøker, regning med brøker og omsætning mellem brøker, decimaltal og procent.',
-    fællesMål:['Tal & algebra', 'Brøker, decimaltal og procent'] },
-  { id: 3, title:'Vandets kredsløb', fag:'N/T', uger:3,
-    beskrivelse:'Eksperimenter med fordampning, kondensering og nedbør. Klimaperspektiv på lokalt og globalt vand.',
-    fællesMål:['Undersøgelse', 'Modellering', 'Naturfaglige undersøgelser og forsøg', 'Bæredygtighed og klima'] },
-  { id: 4, title:'Verdenskrigene', fag:'Historie', uger:5,
-    beskrivelse:'1. og 2. verdenskrigs årsager, forløb og konsekvenser. Særligt fokus på besættelsen af Danmark.',
-    fællesMål:['Kronologi & sammenhænge', 'Kildearbejde', 'Årsag og virkning', 'Kildekritik (ophav, formål, troværdighed)'] },
-  { id: 5, title:'Daily life in the UK', fag:'Engelsk', uger:3,
-    beskrivelse:'Ordforråd og hverdagsdialoger. Kulturforståelse og sammenligning med dansk hverdag.',
-    fællesMål:['Mundtlig kommunikation', 'Kultur & samfund', 'Samtale og dialog', 'Sammenligning med dansk hverdag'] },
-  { id: 6, title:'Bevægelse og puls', fag:'Idræt', uger:2,
-    beskrivelse:'Konditionstest, intervaltræning og forståelse af pulszoner. Personlige mål og logbog.',
-    fællesMål:['Krop, træning & trivsel', 'Konditionstræning og puls'] },
-  { id: 7, title:'Læseuge: novelle', fag:'Dansk', uger:1,
-    beskrivelse:'Fokuseret arbejde med moderne dansk novelle — læsning, analyse og kort skriveøvelse.',
-    fællesMål:['Læsning', 'Fortolkning', 'Litterær analyse'] },
-  { id: 8, title:'Grammatik: ordklasser', fag:'Dansk', uger:2,
-    beskrivelse:'Repetition og fordybelse i de ti ordklasser med praktiske øvelser og spil.',
-    fællesMål:['Fremstilling', 'Sproglig korrekthed'] },
-  { id: 9, title:'Geometri: figurer og areal', fag:'Matematik', uger:4,
-    beskrivelse:'Arbejde med trekanter, firkanter og cirkler. Beregning af omkreds og areal.',
-    fællesMål:['Geometri & måling', 'Figurer og egenskaber', 'Areal og omkreds'] },
-  { id: 10, title:'Statistik fra hverdagen', fag:'Matematik', uger:2,
-    beskrivelse:'Indsamling og bearbejdning af egne data. Diagrammer, gennemsnit og median.',
-    fællesMål:['Statistik & sandsynlighed', 'Diagrammer og grafer', 'Gennemsnit, typetal og median'] },
-  { id: 11, title:'Efterårsferie', fag:'Alternativt', uger:1,
-    beskrivelse:'Skolefri — ingen undervisning denne uge.',
-    fællesMål:[] },
-  { id: 12, title:'Emneuge', fag:'Alternativt', uger:1,
-    beskrivelse:'Tværgående emneuge på tværs af fag — f.eks. trivsel, motion og bevægelse eller projektarbejde.',
-    fællesMål:[] }
-];
-
-let nextId = 13;
+let library = [];
+let libraryLoaded = false;
 let weeks = [];
 let editingId = null;
 let pickerWeekIdx = null;
@@ -1378,9 +1366,79 @@ function createForløbCard(f) {
   return card;
 }
 
+//------------------------------------------------------
+// SUPABASE-BACKED LIBRARY (load/save via /api/forloeb)
+//------------------------------------------------------
+
+function setLibStatus(message, isError) {
+  const el = document.getElementById('lib-status');
+  if (!el) return;
+  el.textContent = message;
+  el.classList.toggle('error', !!isError);
+  el.hidden = false;
+}
+
+function clearLibStatus() {
+  const el = document.getElementById('lib-status');
+  if (el) el.hidden = true;
+}
+
+// Thin fetch wrapper for the forløb API. Redirects to /login on 401 and
+// throws a readable Error otherwise so callers can show a message.
+async function forloebApi(path, options) {
+  const res = await fetch(path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  if (res.status === 401) {
+    window.location.href = '/login';
+    throw new Error('unauthorized');
+  }
+  if (!res.ok) {
+    let msg = 'fejl';
+    try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (e) {}
+    throw new Error(msg);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+// Load the user's forløb on startup and render them.
+async function loadLibrary() {
+  setLibStatus('Indlæser bibliotek…', false);
+  try {
+    library = await forloebApi('/api/forloeb');
+    libraryLoaded = true;
+    clearLibStatus();
+    renderLibrary();
+    // Forløb kan nu være placeret på uger — gentegn uge-indhold og mål.
+    weeks.forEach((_, i) => { renderWeekContent(i); renderWeekMål(i); });
+    updateMeta();
+  } catch (e) {
+    if (e.message === 'unauthorized') return;
+    libraryLoaded = true;
+    setLibStatus('Kunne ikke indlæse biblioteket. Genindlæs siden for at prøve igen.', true);
+  }
+}
+
 function renderLibrary() {
   const list = document.getElementById('lib-list');
   list.innerHTML = '';
+
+  // Tomt bibliotek (typisk en ny bruger): vis en tydelig opfordring øverst.
+  if (libraryLoaded && library.length === 0) {
+    const cta = document.createElement('div');
+    cta.className = 'lib-empty-cta';
+    const p = document.createElement('p');
+    p.textContent = 'Dit bibliotek er tomt. Opret dit første forløb for at komme i gang.';
+    const b = document.createElement('button');
+    b.className = 'btn btn-primary';
+    b.textContent = '+ Opret dit første forløb';
+    b.addEventListener('click', () => openForløbModal(null));
+    cta.appendChild(p);
+    cta.appendChild(b);
+    list.appendChild(cta);
+  }
 
   // Standard fag-rækkefølge — viser alle fag, også dem uden forløb endnu
   const fagOrder = ['Dansk', 'Matematik', 'Engelsk', 'Tysk', 'Historie', 'N/T', 'Idræt', 'Musik', 'Billedkunst', 'Valgfag', 'Tværfagligt', 'Alternativt'];
@@ -1675,7 +1733,7 @@ document.getElementById('new-fag').addEventListener('change', () => {
   renderPicker('new-picker', forløbPickerState);
 });
 
-document.getElementById('modal-save').addEventListener('click', () => {
+document.getElementById('modal-save').addEventListener('click', async () => {
   const title = document.getElementById('new-title').value.trim();
   if (!title) { document.getElementById('new-title').focus(); return; }
   const data = {
@@ -1685,33 +1743,62 @@ document.getElementById('modal-save').addEventListener('click', () => {
     beskrivelse: document.getElementById('new-desc').value.trim() || 'Ingen beskrivelse endnu.',
     fællesMål: Array.from(forløbPickerState.selected)
   };
-  if (editingId) {
-    const i = library.findIndex(l => l.id === editingId);
-    library[i] = { ...library[i], ...data };
-  } else {
-    library.push({ id: nextId++, ...data });
+  const btn = document.getElementById('modal-save');
+  const prevLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Gemmer…';
+  try {
+    if (editingId) {
+      // PATCH: opdatér eksisterende forløb i Supabase.
+      const updated = await forloebApi('/api/forloeb/' + editingId, {
+        method: 'PATCH', body: JSON.stringify(data),
+      });
+      const i = library.findIndex(l => l.id === editingId);
+      if (i !== -1) library[i] = updated;
+    } else {
+      // POST: opret nyt forløb og brug det returnerede id (uuid).
+      const created = await forloebApi('/api/forloeb', {
+        method: 'POST', body: JSON.stringify(data),
+      });
+      library.push(created);
+    }
+    renderLibrary();
+    // Refresh weeks in case fællesMål changed
+    weeks.forEach((_, i) => { renderWeekContent(i); renderWeekMål(i); });
+    modalForløb.classList.remove('open');
+  } catch (e) {
+    if (e.message !== 'unauthorized') alert('Kunne ikke gemme forløbet. Prøv igen.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = prevLabel;
   }
-  renderLibrary();
-  // Refresh weeks in case fællesMål changed
-  weeks.forEach((_, i) => { renderWeekContent(i); renderWeekMål(i); });
-  modalForløb.classList.remove('open');
 });
 
-document.getElementById('modal-delete').addEventListener('click', () => {
+document.getElementById('modal-delete').addEventListener('click', async () => {
   if (!editingId) return;
   if (!confirm('Slet dette forløb fra biblioteket? Det fjernes også fra årsplanen.')) return;
-  // Remove from weeks
-  weeks.forEach(w => {
-    if (w.content?.type === 'forløb' && w.content.id === editingId) {
-      w.content = null;
-      w.fællesMålOverride = null;
-    }
-  });
-  library = library.filter(l => l.id !== editingId);
-  renderLibrary();
-  weeks.forEach((_, i) => { renderWeekContent(i); renderWeekMål(i); });
-  updateMeta();
-  modalForløb.classList.remove('open');
+  const delId = editingId;
+  const btn = document.getElementById('modal-delete');
+  btn.disabled = true;
+  try {
+    await forloebApi('/api/forloeb/' + delId, { method: 'DELETE' });
+    // Remove from weeks
+    weeks.forEach(w => {
+      if (w.content?.type === 'forløb' && w.content.id === delId) {
+        w.content = null;
+        w.fællesMålOverride = null;
+      }
+    });
+    library = library.filter(l => l.id !== delId);
+    renderLibrary();
+    weeks.forEach((_, i) => { renderWeekContent(i); renderWeekMål(i); });
+    updateMeta();
+    modalForløb.classList.remove('open');
+  } catch (e) {
+    if (e.message !== 'unauthorized') alert('Kunne ikke slette forløbet. Prøv igen.');
+  } finally {
+    btn.disabled = false;
+  }
 });
 
 //------------------------------------------------------
@@ -1889,8 +1976,10 @@ document.getElementById('cfg-klasse').addEventListener('input', updateMeta);
 })();
 
 expandedFag = null;
-renderLibrary();
 generateWeeks();
+renderLibrary();
+// Hent brugerens forløb fra Supabase (gentegner biblioteket og ugerne).
+loadLibrary();
 </script>
 
 </body>
