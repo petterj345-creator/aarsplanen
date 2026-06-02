@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Årsplanen — demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --bg: #F2EDE2;
+    --surface: #FAF7EF;
+    --surface-2: #EDE7D6;
+    --ink: #1C1B17;
+    --ink-2: #5C574C;
+    --ink-3: #8B8472;
+    --line: #D9D2BD;
+    --line-2: #BFB69D;
+    --accent: #1F4E5F;
+    --accent-light: #D5E2E2;
+    --accent-2: #163E4D;
+    --rust: #B8442C;
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--line);
+    padding: 22px 36px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .logo { display: flex; align-items: baseline; gap: 12px; }
+  .logo-mark {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .logo-tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-3);
+  }
+  .header-meta {
+    font-size: 12px;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  
+  /* CONFIG BAR */
+  .config {
+    padding: 18px 36px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 28px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+  .field input, .field select {
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line-2);
+    padding: 4px 0;
+    min-width: 110px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus { border-bottom-color: var(--accent); }
+  .field-week input { width: 60px; min-width: 60px; }
+  .config-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line-2);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { background: var(--surface-2); }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--surface);
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: var(--accent-2); }
+  .btn-ghost { border: none; padding: 6px 10px; color: var(--ink-2); }
+  .btn-ghost:hover { color: var(--ink); background: var(--surface-2); }
+  
+  /* MAIN LAYOUT */
+  .main {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 168px);
+  }
+  
+  /* LIBRARY */
+  .library {
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    padding: 24px;
+    overflow-y: auto;
+    max-height: calc(100vh - 168px);
+  }
+  .lib-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .lib-title {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .lib-count {
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+  }
+  .lib-sub {
+    font-size: 12px;
+    color: var(--ink-2);
+    margin-bottom: 18px;
+    line-height: 1.55;
+  }
+  .lib-add {
+    width: 100%;
+    margin-bottom: 18px;
+    border: 1px dashed var(--line-2);
+    background: transparent;
+    padding: 11px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--ink-2);
+    transition: all 0.15s;
+  }
+  .lib-add:hover { border-color: var(--accent); color: var(--accent); }
+  .lib-list { display: flex; flex-direction: column; }
+
+  .lib-group {
+    border-bottom: 1px solid var(--line);
+  }
+  .lib-group:last-child { border-bottom: none; }
+  .lib-group-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+    position: relative;
+  }
+  .lib-group-header::before {
+    content: '';
+    position: absolute;
+    inset: 4px -6px;
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    opacity: 0;
+    transition: opacity 0.18s;
+    z-index: 0;
+  }
+  .lib-group-header:hover::before { opacity: 0.7; }
+  .lib-group-header > * { position: relative; z-index: 1; }
+  .lib-group-chevron {
+    width: 11px;
+    height: 11px;
+    color: var(--ink-3);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .lib-group-chevron svg { display: block; overflow: visible; }
+  .lib-group.open .lib-group-chevron {
+    transform: rotate(90deg);
+    color: var(--accent);
+  }
+  .lib-group-header:hover .lib-group-chevron { color: var(--ink-2); }
+  .lib-group-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px var(--surface);
+  }
+  .lib-group-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0.005em;
+  }
+  .lib-group-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    padding: 1px 8px;
+    background: transparent;
+    border-radius: 10px;
+    transition: all 0.18s;
+    font-weight: 500;
+  }
+  .lib-group.open .lib-group-count {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+  .lib-group-body {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding: 2px 0 16px;
+  }
+  .lib-group.open .lib-group-body { display: flex; }
+  .lib-group-empty {
+    font-size: 12px;
+    color: var(--ink-3);
+    font-style: italic;
+    padding: 4px 0;
+  }
+  .lib-group-add {
+    background: transparent;
+    border: 1px dashed var(--line-2);
+    padding: 8px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--ink-3);
+    transition: all 0.15s;
+    margin-top: 4px;
+  }
+  .lib-group-add:hover { border-color: var(--accent); color: var(--accent); }
+  
+  .forløb-card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px 13px;
+    cursor: grab;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .forløb-card:hover {
+    border-color: var(--line-2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(28,27,23,0.06);
+  }
+  .forløb-card:hover .lib-edit-btn { opacity: 1; }
+  .forløb-card:active { cursor: grabbing; }
+  .forløb-card.dragging { opacity: 0.35; }
+  .forløb-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    gap: 6px;
+  }
+  .fag-pill {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    color: white;
+  }
+  .duration {
+    font-size: 11px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    margin-left: auto;
+  }
+  .lib-edit-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-3);
+    font-size: 11px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    padding: 0 4px;
+  }
+  .lib-edit-btn:hover { color: var(--ink); }
+  .forløb-title {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.25;
+    margin-bottom: 5px;
+  }
+  .forløb-desc {
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+  .forløb-mål {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .forløb-mål-tag {
+    font-size: 10px;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 2px 6px;
+    border-radius: 3px;
+    line-height: 1.3;
+  }
+  
+  /* Fag colors */
+  .fag-dansk { background: #B8442C; }
+  .fag-matematik { background: #2C5F7A; }
+  .fag-engelsk { background: #6B7F3C; }
+  .fag-historie { background: #A07F2D; }
+  .fag-nt { background: #3E7F70; }
+  .fag-idræt { background: #C46A3A; }
+  .fag-musik { background: #7A4E7B; }
+  .fag-billedkunst { background: #B85B7C; }
+  .fag-tværfagligt { background: #5C574C; }
+  
+  /* WEEKS AREA */
+  .weeks {
+    padding: 28px 36px 60px;
+    overflow-y: auto;
+    max-height: calc(100vh - 168px);
+  }
+  .weeks-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .weeks-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; }
+  .weeks-meta { font-size: 12px; color: var(--ink-2); }
+  .weeks-meta strong { color: var(--ink); font-weight: 500; }
+  
+  .week {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 24px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: flex-start;
+  }
+  .week:last-child { border-bottom: none; }
+  .week-meta { position: sticky; top: 0; }
+  .week-number {
+    font-family: 'Fraunces', serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+  .week-num-big {
+    font-family: 'Fraunces', serif;
+    font-size: 38px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .week-dates {
+    font-size: 12px;
+    color: var(--ink-2);
+    margin-top: 5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .week-body { min-width: 0; }
+  .week-uvm {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    cursor: pointer;
+    padding: 4px 6px;
+    margin-left: -6px;
+    border-radius: var(--radius);
+    transition: background 0.15s;
+  }
+  .week-uvm:hover { background: var(--surface-2); }
+  .week-uvm-label {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    font-size: 10px;
+    color: var(--ink-3);
+  }
+  .uvm-tag {
+    background: var(--accent-light);
+    padding: 2px 8px;
+    border-radius: 3px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .uvm-add {
+    background: transparent;
+    border: 1px dashed var(--line-2);
+    padding: 1px 8px;
+    border-radius: 3px;
+    color: var(--ink-3);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .uvm-add:hover { border-color: var(--accent); color: var(--accent); }
+  
+  .week-content {
+    min-height: 72px;
+    position: relative;
+  }
+  .drop-zone {
+    border: 1.5px dashed var(--line-2);
+    border-radius: var(--radius);
+    padding: 18px;
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 13px;
+    transition: all 0.18s;
+    cursor: pointer;
+    background: transparent;
+  }
+  .drop-zone:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+  .drop-zone.dragover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+    border-style: solid;
+  }
+  .drop-zone-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin-top: 4px;
+  }
+  .drop-zone-actions a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .drop-zone-actions a:hover { text-decoration-color: var(--accent); }
+  
+  .week-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--surface);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .week-textarea:focus { border-color: var(--accent); background: white; }
+  
+  .placed-forløb {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--line-2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .placed-forløb-main { flex: 1; min-width: 0; }
+  .placed-forløb-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .placed-forløb-title {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .placed-forløb-desc {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.55;
+    margin-top: 4px;
+  }
+  .placed-actions {
+    display: flex;
+    gap: 6px;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+  .placed-forløb:hover .placed-actions { opacity: 1; }
+  .icon-btn {
+    background: transparent;
+    border: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { background: var(--surface-2); color: var(--ink); }
+  .icon-btn.danger:hover { background: #FBE5DF; color: var(--rust); }
+  
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--ink-3);
+  }
+  .empty-state .serif { font-family: 'Fraunces', serif; font-size: 22px; color: var(--ink-2); margin-bottom: 8px; }
+  .empty-state-sub { font-size: 13px; }
+  
+  /* MODAL */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 27, 23, 0.48);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .modal-sub {
+    font-size: 13px;
+    color: var(--ink-2);
+    margin-bottom: 22px;
+    line-height: 1.5;
+  }
+  .modal label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    font-weight: 600;
+    margin-bottom: 5px;
+    margin-top: 14px;
+  }
+  .modal label:first-of-type { margin-top: 0; }
+  .modal input, .modal textarea, .modal select {
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: white;
+    border: 1px solid var(--line);
+    padding: 9px 12px;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .modal input:focus, .modal textarea:focus, .modal select:focus { border-color: var(--accent); }
+  .modal textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 24px;
+    align-items: center;
+  }
+  .modal-actions-right { display: flex; gap: 10px; }
+  
+  /* PICKER */
+  .picker {
+    margin-top: 8px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .picker-section { margin-bottom: 12px; }
+  .picker-section:last-child { margin-bottom: 0; }
+  .picker-section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .picker-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .picker-pill {
+    font-family: inherit;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: white;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.3;
+  }
+  .picker-pill:hover {
+    border-color: var(--line-2);
+    color: var(--ink);
+  }
+  .picker-pill.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .picker-pill.detail {
+    font-size: 11px;
+    padding: 4px 9px;
+    background: var(--surface);
+  }
+  .picker-pill.detail.selected {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .picker-empty {
+    font-size: 12px;
+    color: var(--ink-3);
+    font-style: italic;
+    padding: 6px 0;
+  }
+  .picker-source {
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+  
+  /* PDF */
+  .pdf-container {
+    position: absolute;
+    left: -10000px;
+    top: 0;
+    width: 794px;
+    background: white;
+    color: #1A1814;
+    padding: 56px 60px;
+    font-family: 'Manrope', sans-serif;
+  }
+  .pdf-header {
+    border-bottom: 2px solid #1F4E5F;
+    padding-bottom: 16px;
+    margin-bottom: 28px;
+  }
+  .pdf-title {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .pdf-sub {
+    font-size: 13px;
+    color: #5C574C;
+    display: flex;
+    gap: 18px;
+  }
+  .pdf-sub span strong { color: #1A1814; font-weight: 500; }
+  .pdf-week {
+    page-break-inside: avoid;
+    padding: 16px 0;
+    border-bottom: 1px solid #D9D2BD;
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 22px;
+  }
+  .pdf-week-num {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .pdf-week-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #8B8472;
+    margin-bottom: 3px;
+  }
+  .pdf-week-dates {
+    font-size: 11px;
+    color: #5C574C;
+    margin-top: 4px;
+  }
+  .pdf-week-body { font-size: 13px; }
+  .pdf-uvm {
+    font-size: 10px;
+    color: #1F4E5F;
+    margin-bottom: 8px;
+  }
+  .pdf-uvm-tag {
+    background: #D5E2E2;
+    color: #1F4E5F;
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-right: 4px;
+    display: inline-block;
+    margin-bottom: 3px;
+  }
+  .pdf-content-title {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 3px;
+  }
+  .pdf-content-desc { color: #5C574C; line-height: 1.5; }
+  .pdf-fag-tag {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: white;
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .pdf-empty { color: #8B8472; font-style: italic; font-size: 12px; }
+  
+  @media (max-width: 1000px) {
+    .main { grid-template-columns: 1fr; }
+    .library { max-height: 380px; border-right: none; border-bottom: 1px solid var(--line); }
+    .weeks { max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <span class="logo-mark">Årsplanen</span>
+    <span class="logo-tag">demo · v2</span>
+  </div>
+  <div class="header-meta">Skoleåret 2025/26</div>
+</header>
+
+<section class="config">
+  <div class="field">
+    <span class="field-label">Fag</span>
+    <select id="cfg-fag">
+      <option value="Dansk">Dansk</option>
+      <option value="Matematik">Matematik</option>
+      <option value="Engelsk">Engelsk</option>
+      <option value="Historie">Historie</option>
+      <option value="N/T">Natur/teknologi</option>
+      <option value="Idræt">Idræt</option>
+      <option value="Musik">Musik</option>
+      <option value="Billedkunst">Billedkunst</option>
+    </select>
+  </div>
+  <div class="field">
+    <span class="field-label">Klasse</span>
+    <input id="cfg-klasse" type="text" value="5.B" placeholder="5.B">
+  </div>
+  <div class="field field-week">
+    <span class="field-label">Startuge</span>
+    <input id="cfg-start" type="number" min="1" max="53" value="33">
+  </div>
+  <div class="field field-week">
+    <span class="field-label">Slutuge</span>
+    <input id="cfg-end" type="number" min="1" max="53" value="25">
+  </div>
+  <div class="field field-week">
+    <span class="field-label">År</span>
+    <input id="cfg-year" type="number" min="2024" max="2030" value="2025">
+  </div>
+  <div class="config-actions">
+    <button class="btn" id="btn-generate">Generér uger</button>
+    <button class="btn btn-primary" id="btn-export">Eksportér PDF</button>
+  </div>
+</section>
+
+<main class="main">
+
+  <aside class="library">
+    <div class="lib-header">
+      <span class="lib-title">Forløbsbibliotek</span>
+      <span class="lib-count" id="lib-count">0 forløb</span>
+    </div>
+    <p class="lib-sub">Klik et fag for at folde det ud. Træk et forløb over på en uge — Fælles Mål følger automatisk med.</p>
+    <div class="lib-list" id="lib-list"></div>
+  </aside>
+
+  <section class="weeks">
+    <div class="weeks-head">
+      <h1 class="weeks-title" id="plan-title">Dansk · 5.B</h1>
+      <div class="weeks-meta" id="plan-meta">Uge 33 – 25 · <strong>0 forløb placeret</strong></div>
+    </div>
+    <div id="weeks-list"></div>
+  </section>
+
+</main>
+
+<!-- ADD/EDIT FORLØB MODAL -->
+<div class="modal-backdrop" id="modal-forløb">
+  <div class="modal">
+    <h2 id="modal-title">Nyt forløb</h2>
+    <p class="modal-sub">Forløb du opretter her, kan trækkes ind på årsplanen. Fælles Mål du vælger, følger automatisk med forløbet.</p>
+    <label>Titel</label>
+    <input id="new-title" type="text" placeholder="F.eks. Eventyr og fortællinger">
+    <div style="display:grid;grid-template-columns:1fr 100px;gap:14px;">
+      <div>
+        <label>Fag</label>
+        <select id="new-fag">
+          <option value="Dansk">Dansk</option>
+          <option value="Matematik">Matematik</option>
+          <option value="Engelsk">Engelsk</option>
+          <option value="Historie">Historie</option>
+          <option value="N/T">Natur/teknologi</option>
+          <option value="Idræt">Idræt</option>
+          <option value="Musik">Musik</option>
+          <option value="Billedkunst">Billedkunst</option>
+          <option value="Tværfagligt">Tværfagligt</option>
+        </select>
+      </div>
+      <div>
+        <label>Varighed (uger)</label>
+        <input id="new-uger" type="number" min="1" max="20" value="3">
+      </div>
+    </div>
+    <label>Beskrivelse</label>
+    <textarea id="new-desc" placeholder="Kort om forløbets indhold, mål og produkter…"></textarea>
+    <label>Fælles Mål</label>
+    <div id="new-picker"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-delete" style="display:none;color:var(--rust)">Slet forløb</button>
+      <div class="modal-actions-right" style="margin-left:auto;">
+        <button class="btn" id="modal-cancel">Annullér</button>
+        <button class="btn btn-primary" id="modal-save">Gem i bibliotek</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK FÆLLES MÅL MODAL -->
+<div class="modal-backdrop" id="modal-week-mål">
+  <div class="modal">
+    <h2>Fælles Mål for denne uge</h2>
+    <p class="modal-sub" id="week-mål-sub">Justér målene specifikt for denne uge. Det overskriver kun her — forløbet i biblioteket ændres ikke.</p>
+    <div id="week-picker"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="week-reset" style="color:var(--ink-2)">Brug forløbets standard</button>
+      <div class="modal-actions-right" style="margin-left:auto;">
+        <button class="btn" id="week-cancel">Annullér</button>
+        <button class="btn btn-primary" id="week-save">Gem</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pdf-container" id="pdf-container"></div>
+
+<script>
+//------------------------------------------------------
+// FÆLLES MÅL — kompetenceområder og konkrete færdigheds-/vidensmål
+// Forenklet datasæt baseret på UVM's "Fælles Mål" (emu.dk)
+//------------------------------------------------------
+
+const fællesMålData = {
+  'Dansk': {
+    'Læsning': [
+      'Afkodning og læseforståelse',
+      'Læsning af fag- og skønlitteratur',
+      'Læseteknikker (skimning, nærlæsning)',
+      'Sproglig bevidsthed'
+    ],
+    'Fortolkning': [
+      'Personkarakteristik og fortællerforhold',
+      'Symboler, temaer og budskab',
+      'Genrekendskab',
+      'Litterær analyse'
+    ],
+    'Kommunikation': [
+      'Mundtlig fremlæggelse',
+      'Dialog og samtaleformer',
+      'Digital kommunikation',
+      'Argumentation'
+    ],
+    'Fremstilling': [
+      'Skriftlig fremstilling i forskellige genrer',
+      'Layout og opsætning',
+      'Sproglig korrekthed',
+      'Skriveprocesser og respons'
+    ]
+  },
+  'Matematik': {
+    'Tal & algebra': [
+      'Brøker, decimaltal og procent',
+      'Variabler og udtryk',
+      'Negative tal',
+      'Regnehierarki'
+    ],
+    'Geometri & måling': [
+      'Figurer og egenskaber',
+      'Måleenheder og omregning',
+      'Symmetri og spejlinger',
+      'Areal og omkreds'
+    ],
+    'Statistik & sandsynlighed': [
+      'Diagrammer og grafer',
+      'Gennemsnit, typetal og median',
+      'Eksperimentel sandsynlighed'
+    ],
+    'Problembehandling': [
+      'Modellering af hverdagsproblemer',
+      'Ræsonnement',
+      'Matematisk kommunikation'
+    ]
+  },
+  'Engelsk': {
+    'Mundtlig kommunikation': [
+      'Lytning og forståelse',
+      'Samtale og dialog',
+      'Præsentation',
+      'Udtale og intonation'
+    ],
+    'Skriftlig kommunikation': [
+      'Læsning af forskellige teksttyper',
+      'Skrivning af egne tekster',
+      'Sprogbrug og grammatik',
+      'Ordforråd'
+    ],
+    'Kultur & samfund': [
+      'Engelsktalende lande og kulturer',
+      'Sammenligning med dansk hverdag',
+      'Medier og populærkultur'
+    ]
+  },
+  'Historie': {
+    'Kronologi & sammenhænge': [
+      'Tidslinjer og periodisering',
+      'Årsag og virkning',
+      'Lokalhistorie og verdenshistorie'
+    ],
+    'Kildearbejde': [
+      'Kildekritik (ophav, formål, troværdighed)',
+      'Førstehånds- og andenhåndskilder',
+      'Billeder som kilde'
+    ],
+    'Historiebrug': [
+      'Erindring og historiekultur',
+      'Hvordan historien bruges i samtiden',
+      'Egen identitet og historie'
+    ]
+  },
+  'N/T': {
+    'Undersøgelse': [
+      'Naturfaglige undersøgelser og forsøg',
+      'Hypoteser og forudsigelser',
+      'Observationer og målinger'
+    ],
+    'Modellering': [
+      'Naturfaglige modeller',
+      'Visualisering af processer',
+      'Brug af digitale værktøjer'
+    ],
+    'Perspektivering': [
+      'Naturfag i hverdagen',
+      'Bæredygtighed og klima',
+      'Teknologi og samfund'
+    ],
+    'Kommunikation': [
+      'Naturfaglig formidling',
+      'Faglige begreber',
+      'Argumentation med data'
+    ]
+  },
+  'Idræt': {
+    'Alsidig idrætsudøvelse': [
+      'Boldspil og holdspil',
+      'Atletik og løb',
+      'Gymnastik og bevægelse',
+      'Dans og rytmik'
+    ],
+    'Idrætskultur & relationer': [
+      'Fair play og samarbejde',
+      'Idrættens betydning i samfundet',
+      'Reglerne i forskellige idrætter'
+    ],
+    'Krop, træning & trivsel': [
+      'Konditionstræning og puls',
+      'Styrke og bevægelighed',
+      'Sundhed og livsstil'
+    ]
+  },
+  'Musik': {
+    'Musikudøvelse': [
+      'Sang og stemmebrug',
+      'Spil på instrumenter',
+      'Sammenspil'
+    ],
+    'Musikalsk skaben': [
+      'Komposition og improvisation',
+      'Digital musikproduktion'
+    ],
+    'Musikforståelse': [
+      'Genrer og perioder',
+      'Musikteori og noder',
+      'Musik i kultur og samfund'
+    ]
+  },
+  'Billedkunst': {
+    'Billedfremstilling': [
+      'Tegning og maleri',
+      'Tredimensionelle billeder',
+      'Digitale billeder'
+    ],
+    'Billedanalyse': [
+      'Komposition og virkemidler',
+      'Genrer og perioder',
+      'Kunst i hverdagen'
+    ],
+    'Billedkommunikation': [
+      'Visuel fortælling',
+      'Reklame og medier'
+    ]
+  },
+  'Tværfagligt': {
+    'Tværfagligt': [
+      'Innovation og entreprenørskab',
+      'Bæredygtighed',
+      'Digital dannelse',
+      'Demokrati og medborgerskab'
+    ]
+  }
+};
+
+const fagClass = (fag) => ({
+  'Dansk':'fag-dansk','Matematik':'fag-matematik','Engelsk':'fag-engelsk',
+  'Historie':'fag-historie','N/T':'fag-nt','Idræt':'fag-idræt',
+  'Musik':'fag-musik','Billedkunst':'fag-billedkunst','Tværfagligt':'fag-tværfagligt'
+}[fag] || 'fag-tværfagligt');
+const fagColor = (fag) => ({
+  'Dansk':'#B8442C','Matematik':'#2C5F7A','Engelsk':'#6B7F3C',
+  'Historie':'#A07F2D','N/T':'#3E7F70','Idræt':'#C46A3A',
+  'Musik':'#7A4E7B','Billedkunst':'#B85B7C','Tværfagligt':'#5C574C'
+}[fag] || '#5C574C');
+
+//------------------------------------------------------
+// INITIAL LIBRARY
+//------------------------------------------------------
+
+let library = [
+  { id: 1, title:'H.C. Andersens eventyr', fag:'Dansk', uger:4,
+    beskrivelse:'Læsning og analyse af klassiske eventyr med fokus på fortællestruktur, personkarakteristik og symbolik.',
+    fællesMål:['Læsning', 'Fortolkning', 'Personkarakteristik og fortællerforhold', 'Symboler, temaer og budskab'] },
+  { id: 2, title:'Brøker og decimaltal', fag:'Matematik', uger:3,
+    beskrivelse:'Introduktion til brøker, regning med brøker og omsætning mellem brøker, decimaltal og procent.',
+    fællesMål:['Tal & algebra', 'Brøker, decimaltal og procent'] },
+  { id: 3, title:'Vandets kredsløb', fag:'N/T', uger:3,
+    beskrivelse:'Eksperimenter med fordampning, kondensering og nedbør. Klimaperspektiv på lokalt og globalt vand.',
+    fællesMål:['Undersøgelse', 'Modellering', 'Naturfaglige undersøgelser og forsøg', 'Bæredygtighed og klima'] },
+  { id: 4, title:'Verdenskrigene', fag:'Historie', uger:5,
+    beskrivelse:'1. og 2. verdenskrigs årsager, forløb og konsekvenser. Særligt fokus på besættelsen af Danmark.',
+    fællesMål:['Kronologi & sammenhænge', 'Kildearbejde', 'Årsag og virkning', 'Kildekritik (ophav, formål, troværdighed)'] },
+  { id: 5, title:'Daily life in the UK', fag:'Engelsk', uger:3,
+    beskrivelse:'Ordforråd og hverdagsdialoger. Kulturforståelse og sammenligning med dansk hverdag.',
+    fællesMål:['Mundtlig kommunikation', 'Kultur & samfund', 'Samtale og dialog', 'Sammenligning med dansk hverdag'] },
+  { id: 6, title:'Bevægelse og puls', fag:'Idræt', uger:2,
+    beskrivelse:'Konditionstest, intervaltræning og forståelse af pulszoner. Personlige mål og logbog.',
+    fællesMål:['Krop, træning & trivsel', 'Konditionstræning og puls'] },
+  { id: 7, title:'Læseuge: novelle', fag:'Dansk', uger:1,
+    beskrivelse:'Fokuseret arbejde med moderne dansk novelle — læsning, analyse og kort skriveøvelse.',
+    fællesMål:['Læsning', 'Fortolkning', 'Litterær analyse'] },
+  { id: 8, title:'Grammatik: ordklasser', fag:'Dansk', uger:2,
+    beskrivelse:'Repetition og fordybelse i de ti ordklasser med praktiske øvelser og spil.',
+    fællesMål:['Fremstilling', 'Sproglig korrekthed'] },
+  { id: 9, title:'Geometri: figurer og areal', fag:'Matematik', uger:4,
+    beskrivelse:'Arbejde med trekanter, firkanter og cirkler. Beregning af omkreds og areal.',
+    fællesMål:['Geometri & måling', 'Figurer og egenskaber', 'Areal og omkreds'] },
+  { id: 10, title:'Statistik fra hverdagen', fag:'Matematik', uger:2,
+    beskrivelse:'Indsamling og bearbejdning af egne data. Diagrammer, gennemsnit og median.',
+    fællesMål:['Statistik & sandsynlighed', 'Diagrammer og grafer', 'Gennemsnit, typetal og median'] }
+];
+
+let nextId = 11;
+let weeks = [];
+let editingId = null;
+let pickerWeekIdx = null;
+let expandedFag = null;
+
+//------------------------------------------------------
+// DATE HELPERS
+//------------------------------------------------------
+
+function getMondayOfISOWeek(week, year) {
+  const simple = new Date(year, 0, 1 + (week - 1) * 7);
+  const dow = simple.getDay();
+  const ISOweekStart = new Date(simple);
+  if (dow <= 4) ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+  else ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+  return ISOweekStart;
+}
+function weeksInISOYear(year) {
+  const d = new Date(year, 11, 28);
+  const dayNum = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - dayNum + 3);
+  const firstThu = new Date(d.getFullYear(), 0, 1);
+  firstThu.setDate(firstThu.getDate() + ((4 - firstThu.getDay() + 7) % 7));
+  return Math.round((d - firstThu) / 604800000) + 1;
+}
+const måneder = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+function formatDateRange(mon, fri) {
+  const sameMonth = mon.getMonth() === fri.getMonth();
+  if (sameMonth) return `${mon.getDate()}.–${fri.getDate()}. ${måneder[mon.getMonth()]}`;
+  return `${mon.getDate()}. ${måneder[mon.getMonth()]} – ${fri.getDate()}. ${måneder[fri.getMonth()]}`;
+}
+
+//------------------------------------------------------
+// GENERATE WEEKS
+//------------------------------------------------------
+
+function generateWeeks() {
+  const startUge = parseInt(document.getElementById('cfg-start').value, 10);
+  const slutUge = parseInt(document.getElementById('cfg-end').value, 10);
+  const startYear = parseInt(document.getElementById('cfg-year').value, 10);
+
+  const newWeeks = [];
+  let uge = startUge;
+  let year = startYear;
+  let safety = 0;
+
+  while (safety++ < 80) {
+    const mon = getMondayOfISOWeek(uge, year);
+    const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
+    const existing = weeks.find(w => w.uge === uge && w.year === year);
+    newWeeks.push({ 
+      uge, year, mon, fri, 
+      content: existing ? existing.content : null,
+      fællesMålOverride: existing ? existing.fællesMålOverride : null
+    });
+    if (uge === slutUge) break;
+    uge++;
+    if (uge > weeksInISOYear(year)) { uge = 1; year++; }
+    if (newWeeks.length > 60) break;
+  }
+  weeks = newWeeks;
+  renderWeeks();
+  updateMeta();
+}
+
+//------------------------------------------------------
+// PICKER COMPONENT
+// Renders kompetenceområder + sub-mål
+// state = {fag, selected: Set<string>}
+//------------------------------------------------------
+
+function renderPicker(containerId, state, onChange) {
+  const root = document.getElementById(containerId);
+  const data = fællesMålData[state.fag] || {};
+  const kompetencer = Object.keys(data);
+  
+  if (!kompetencer.length) {
+    root.innerHTML = '<div class="picker-empty">Vælg et fag for at se Fælles Mål.</div>';
+    return;
+  }
+
+  let html = '<div class="picker">';
+  
+  // Kompetenceområder
+  html += '<div class="picker-section">';
+  html += '<div class="picker-section-title">Kompetenceområder</div>';
+  html += '<div class="picker-pills">';
+  kompetencer.forEach(k => {
+    const sel = state.selected.has(k) ? 'selected' : '';
+    html += `<button class="picker-pill ${sel}" data-type="komp" data-value="${escapeAttr(k)}">${escapeHtml(k)}</button>`;
+  });
+  html += '</div></div>';
+  
+  // Detaljer for valgte kompetencer
+  const valgteKomp = kompetencer.filter(k => state.selected.has(k));
+  if (valgteKomp.length) {
+    valgteKomp.forEach(k => {
+      const subMål = data[k] || [];
+      if (!subMål.length) return;
+      html += '<div class="picker-section">';
+      html += `<div class="picker-section-title">${escapeHtml(k)} — konkrete færdigheds-/vidensmål</div>`;
+      html += '<div class="picker-pills">';
+      subMål.forEach(m => {
+        const sel = state.selected.has(m) ? 'selected' : '';
+        html += `<button class="picker-pill detail ${sel}" data-type="sub" data-value="${escapeAttr(m)}">${escapeHtml(m)}</button>`;
+      });
+      html += '</div></div>';
+    });
+  }
+  
+  html += '<div class="picker-source">Kilde: Fælles Mål, Børne- og Undervisningsministeriet (forenklet til demo)</div>';
+  html += '</div>';
+  
+  root.innerHTML = html;
+  
+  root.querySelectorAll('.picker-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.value;
+      if (state.selected.has(val)) state.selected.delete(val);
+      else state.selected.add(val);
+      renderPicker(containerId, state, onChange);
+      if (onChange) onChange(state);
+    });
+  });
+}
+
+//------------------------------------------------------
+// LIBRARY
+//------------------------------------------------------
+
+function createForløbCard(f) {
+  const card = document.createElement('div');
+  card.className = 'forløb-card';
+  card.draggable = true;
+  card.dataset.id = f.id;
+  const målTags = (f.fællesMål || []).slice(0, 4).map(m =>
+    `<span class="forløb-mål-tag">${escapeHtml(m)}</span>`
+  ).join('');
+  const flereMål = (f.fællesMål || []).length > 4
+    ? `<span class="forløb-mål-tag">+${f.fællesMål.length - 4}</span>`
+    : '';
+  card.innerHTML = `
+    <div class="forløb-card-head">
+      <span class="duration">${f.uger} ${f.uger === 1 ? 'uge' : 'uger'}</span>
+      <button class="lib-edit-btn" data-edit="${f.id}" title="Redigér">redigér</button>
+    </div>
+    <div class="forløb-title">${escapeHtml(f.title)}</div>
+    <div class="forløb-desc">${escapeHtml(f.beskrivelse)}</div>
+    ${målTags ? `<div class="forløb-mål">${målTags}${flereMål}</div>` : ''}
+  `;
+  card.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('text/plain', JSON.stringify({ kind:'library', id: f.id }));
+    e.dataTransfer.effectAllowed = 'copy';
+    card.classList.add('dragging');
+  });
+  card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  card.querySelector('[data-edit]').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openForløbModal(f.id);
+  });
+  return card;
+}
+
+function renderLibrary() {
+  const list = document.getElementById('lib-list');
+  list.innerHTML = '';
+
+  // Standard fag-rækkefølge — viser alle fag, også dem uden forløb endnu
+  const fagOrder = ['Dansk', 'Matematik', 'Engelsk', 'Historie', 'N/T', 'Idræt', 'Musik', 'Billedkunst', 'Tværfagligt'];
+
+  fagOrder.forEach(fag => {
+    const forløbForFag = library.filter(l => l.fag === fag);
+    const isOpen = expandedFag === fag;
+    const group = document.createElement('div');
+    group.className = 'lib-group' + (isOpen ? ' open' : '');
+
+    const header = document.createElement('div');
+    header.className = 'lib-group-header';
+    header.innerHTML = `
+      <span class="lib-group-chevron"><svg width="11" height="11" viewBox="0 0 11 11"><polyline points="4,2.5 7,5.5 4,8.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="lib-group-dot" style="background:${fagColor(fag)}"></span>
+      <span class="lib-group-name">${escapeHtml(fag)}</span>
+      <span class="lib-group-count">${forløbForFag.length}</span>
+    `;
+    header.addEventListener('click', () => {
+      expandedFag = isOpen ? null : fag;
+      renderLibrary();
+    });
+    group.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'lib-group-body';
+    if (forløbForFag.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'lib-group-empty';
+      empty.textContent = 'Ingen forløb endnu.';
+      body.appendChild(empty);
+    } else {
+      forløbForFag.forEach(f => body.appendChild(createForløbCard(f)));
+    }
+    const addBtn = document.createElement('button');
+    addBtn.className = 'lib-group-add';
+    addBtn.textContent = `+ Tilføj forløb i ${fag}`;
+    addBtn.addEventListener('click', () => openForløbModal(null, fag));
+    body.appendChild(addBtn);
+
+    group.appendChild(body);
+    list.appendChild(group);
+  });
+
+  document.getElementById('lib-count').textContent = `${library.length} forløb`;
+}
+
+//------------------------------------------------------
+// WEEKS
+//------------------------------------------------------
+
+function getWeekMål(idx) {
+  const w = weeks[idx];
+  if (w.fællesMålOverride) return w.fællesMålOverride;
+  if (w.content?.type === 'forløb') {
+    const f = library.find(l => l.id === w.content.id);
+    return f?.fællesMål || [];
+  }
+  return [];
+}
+
+function renderWeeks() {
+  const root = document.getElementById('weeks-list');
+  root.innerHTML = '';
+  if (!weeks.length) {
+    root.innerHTML = `<div class="empty-state"><div class="serif">Klar til at planlægge</div><div class="empty-state-sub">Vælg start- og slutuge og tryk på "Generér uger".</div></div>`;
+    return;
+  }
+  weeks.forEach((w, idx) => {
+    const row = document.createElement('div');
+    row.className = 'week';
+    row.dataset.idx = idx;
+
+    const metaCol = document.createElement('div');
+    metaCol.className = 'week-meta';
+    metaCol.innerHTML = `
+      <div class="week-number">Uge</div>
+      <div class="week-num-big">${w.uge}</div>
+      <div class="week-dates">${formatDateRange(w.mon, w.fri)}<br>${w.year}</div>
+    `;
+
+    const bodyCol = document.createElement('div');
+    bodyCol.className = 'week-body';
+    bodyCol.innerHTML = `<div class="week-uvm-wrap" data-idx="${idx}"></div><div class="week-content" data-idx="${idx}"></div>`;
+    
+    row.appendChild(metaCol);
+    row.appendChild(bodyCol);
+    root.appendChild(row);
+
+    renderWeekMål(idx);
+    renderWeekContent(idx);
+  });
+}
+
+function renderWeekMål(idx) {
+  const wrap = document.querySelector(`.week-uvm-wrap[data-idx="${idx}"]`);
+  if (!wrap) return;
+  const mål = getWeekMål(idx);
+  const isOverride = !!weeks[idx].fællesMålOverride;
+  
+  if (!mål.length) {
+    wrap.innerHTML = `
+      <div class="week-uvm" data-action="edit-mål">
+        <span class="week-uvm-label">Fælles Mål</span>
+        <span class="uvm-add">+ tilføj</span>
+      </div>`;
+  } else {
+    const tags = mål.map(m => `<span class="uvm-tag">${escapeHtml(m)}</span>`).join('');
+    const overrideHint = isOverride ? '<span style="color:var(--ink-3);font-size:10px;">tilpasset</span>' : '';
+    wrap.innerHTML = `
+      <div class="week-uvm" data-action="edit-mål" title="Klik for at redigere">
+        <span class="week-uvm-label">Fælles Mål</span>
+        ${tags}
+        ${overrideHint}
+      </div>`;
+  }
+  wrap.querySelector('[data-action="edit-mål"]').addEventListener('click', () => openWeekMålModal(idx));
+}
+
+function renderWeekContent(idx) {
+  const w = weeks[idx];
+  const container = document.querySelector(`.week-content[data-idx="${idx}"]`);
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!w.content) {
+    const drop = document.createElement('div');
+    drop.className = 'drop-zone';
+    drop.innerHTML = `
+      <div>Træk et forløb hertil</div>
+      <div class="drop-zone-actions">
+        <a data-action="text">eller skriv tekst</a>
+      </div>
+    `;
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+    drop.addEventListener('drop', e => {
+      e.preventDefault();
+      drop.classList.remove('dragover');
+      handleDrop(e, idx);
+    });
+    drop.querySelector('[data-action="text"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      setWeekText(idx, '');
+    });
+    container.appendChild(drop);
+  } else if (w.content.type === 'forløb') {
+    const f = library.find(l => l.id === w.content.id) || w.content;
+    const div = document.createElement('div');
+    div.className = 'placed-forløb';
+    div.style.borderLeftColor = fagColor(f.fag);
+    div.innerHTML = `
+      <div class="placed-forløb-main">
+        <div class="placed-forløb-head">
+          <span class="fag-pill ${fagClass(f.fag)}">${f.fag}</span>
+          <span class="placed-forløb-title">${escapeHtml(f.title)}</span>
+        </div>
+        <div class="placed-forløb-desc">${escapeHtml(f.beskrivelse)}</div>
+      </div>
+      <div class="placed-actions">
+        <button class="icon-btn danger" title="Fjern">✕</button>
+      </div>
+    `;
+    div.querySelector('.icon-btn.danger').addEventListener('click', () => {
+      weeks[idx].content = null;
+      weeks[idx].fællesMålOverride = null;
+      renderWeekContent(idx);
+      renderWeekMål(idx);
+      updateMeta();
+    });
+    container.appendChild(div);
+  } else if (w.content.type === 'tekst') {
+    const ta = document.createElement('textarea');
+    ta.className = 'week-textarea';
+    ta.placeholder = 'Skriv hvad der skal ske i denne uge…';
+    ta.value = w.content.text;
+    ta.addEventListener('input', () => { weeks[idx].content.text = ta.value; });
+    ta.addEventListener('blur', () => {
+      if (!ta.value.trim()) {
+        weeks[idx].content = null;
+        renderWeekContent(idx);
+        updateMeta();
+      }
+    });
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;justify-content:flex-end;margin-top:6px;';
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'btn-ghost btn';
+    clearBtn.style.cssText = 'font-size:11px;padding:4px 8px;';
+    clearBtn.textContent = 'Ryd ugen';
+    clearBtn.addEventListener('click', () => {
+      weeks[idx].content = null;
+      weeks[idx].fællesMålOverride = null;
+      renderWeekContent(idx);
+      renderWeekMål(idx);
+      updateMeta();
+    });
+    actions.appendChild(clearBtn);
+    container.appendChild(ta);
+    container.appendChild(actions);
+    setTimeout(() => ta.focus(), 30);
+  }
+}
+
+function handleDrop(e, idx) {
+  try {
+    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+    if (data.kind === 'library') {
+      const f = library.find(l => l.id === data.id);
+      if (!f) return;
+      const uger = Math.max(1, f.uger || 1);
+      for (let k = 0; k < uger && idx + k < weeks.length; k++) {
+        if (!weeks[idx + k].content) {
+          weeks[idx + k].content = { type:'forløb', id: f.id };
+          weeks[idx + k].fællesMålOverride = null;
+        }
+      }
+      weeks.forEach((_, i) => { renderWeekContent(i); renderWeekMål(i); });
+      updateMeta();
+    }
+  } catch(err) { console.warn('drop failed', err); }
+}
+
+function setWeekText(idx, value) {
+  weeks[idx].content = { type:'tekst', text: value };
+  renderWeekContent(idx);
+  renderWeekMål(idx);
+  updateMeta();
+}
+
+function updateMeta() {
+  const fag = document.getElementById('cfg-fag').value;
+  const klasse = document.getElementById('cfg-klasse').value;
+  document.getElementById('plan-title').textContent = `${fag} · ${klasse}`;
+  const placed = weeks.filter(w => w.content).length;
+  const startUge = weeks[0]?.uge ?? '';
+  const slutUge = weeks[weeks.length-1]?.uge ?? '';
+  document.getElementById('plan-meta').innerHTML = `Uge ${startUge} – ${slutUge} · <strong>${placed} ${placed === 1 ? 'uge planlagt' : 'uger planlagt'}</strong> af ${weeks.length}`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+//------------------------------------------------------
+// FORLØB MODAL (new/edit)
+//------------------------------------------------------
+
+const modalForløb = document.getElementById('modal-forløb');
+let forløbPickerState = { fag: 'Dansk', selected: new Set() };
+
+function openForløbModal(id, prefilledFag) {
+  editingId = id || null;
+  if (id) {
+    const f = library.find(l => l.id === id);
+    document.getElementById('modal-title').textContent = 'Redigér forløb';
+    document.getElementById('new-title').value = f.title;
+    document.getElementById('new-fag').value = f.fag;
+    document.getElementById('new-uger').value = f.uger;
+    document.getElementById('new-desc').value = f.beskrivelse;
+    forløbPickerState = { fag: f.fag, selected: new Set(f.fællesMål || []) };
+    document.getElementById('modal-delete').style.display = '';
+  } else {
+    document.getElementById('modal-title').textContent = 'Nyt forløb';
+    document.getElementById('new-title').value = '';
+    document.getElementById('new-desc').value = '';
+    document.getElementById('new-uger').value = 3;
+    const defaultFag = prefilledFag || expandedFag || document.getElementById('cfg-fag').value;
+    document.getElementById('new-fag').value = defaultFag;
+    forløbPickerState = { fag: defaultFag, selected: new Set() };
+    document.getElementById('modal-delete').style.display = 'none';
+  }
+  renderPicker('new-picker', forløbPickerState);
+  modalForløb.classList.add('open');
+  setTimeout(() => document.getElementById('new-title').focus(), 100);
+}
+
+document.getElementById('modal-cancel').addEventListener('click', () => modalForløb.classList.remove('open'));
+modalForløb.addEventListener('click', (e) => { if (e.target === modalForløb) modalForløb.classList.remove('open'); });
+
+document.getElementById('new-fag').addEventListener('change', () => {
+  forløbPickerState.fag = document.getElementById('new-fag').value;
+  // Keep selections that are still valid
+  const valid = new Set();
+  const data = fællesMålData[forløbPickerState.fag] || {};
+  Object.keys(data).forEach(k => {
+    if (forløbPickerState.selected.has(k)) valid.add(k);
+    (data[k] || []).forEach(m => { if (forløbPickerState.selected.has(m)) valid.add(m); });
+  });
+  forløbPickerState.selected = valid;
+  renderPicker('new-picker', forløbPickerState);
+});
+
+document.getElementById('modal-save').addEventListener('click', () => {
+  const title = document.getElementById('new-title').value.trim();
+  if (!title) { document.getElementById('new-title').focus(); return; }
+  const data = {
+    title,
+    fag: document.getElementById('new-fag').value,
+    uger: parseInt(document.getElementById('new-uger').value, 10) || 1,
+    beskrivelse: document.getElementById('new-desc').value.trim() || 'Ingen beskrivelse endnu.',
+    fællesMål: Array.from(forløbPickerState.selected)
+  };
+  if (editingId) {
+    const i = library.findIndex(l => l.id === editingId);
+    library[i] = { ...library[i], ...data };
+  } else {
+    library.push({ id: nextId++, ...data });
+  }
+  renderLibrary();
+  // Refresh weeks in case fællesMål changed
+  weeks.forEach((_, i) => { renderWeekContent(i); renderWeekMål(i); });
+  modalForløb.classList.remove('open');
+});
+
+document.getElementById('modal-delete').addEventListener('click', () => {
+  if (!editingId) return;
+  if (!confirm('Slet dette forløb fra biblioteket? Det fjernes også fra årsplanen.')) return;
+  // Remove from weeks
+  weeks.forEach(w => {
+    if (w.content?.type === 'forløb' && w.content.id === editingId) {
+      w.content = null;
+      w.fællesMålOverride = null;
+    }
+  });
+  library = library.filter(l => l.id !== editingId);
+  renderLibrary();
+  weeks.forEach((_, i) => { renderWeekContent(i); renderWeekMål(i); });
+  updateMeta();
+  modalForløb.classList.remove('open');
+});
+
+//------------------------------------------------------
+// WEEK MÅL MODAL (per-week override)
+//------------------------------------------------------
+
+const modalWeekMål = document.getElementById('modal-week-mål');
+let weekPickerState = { fag: 'Dansk', selected: new Set() };
+
+function openWeekMålModal(idx) {
+  pickerWeekIdx = idx;
+  const w = weeks[idx];
+  let fag = document.getElementById('cfg-fag').value;
+  if (w.content?.type === 'forløb') {
+    const f = library.find(l => l.id === w.content.id);
+    if (f) fag = f.fag;
+  }
+  const initial = getWeekMål(idx);
+  weekPickerState = { fag, selected: new Set(initial) };
+  const sub = document.getElementById('week-mål-sub');
+  if (w.content?.type === 'forløb') {
+    sub.textContent = 'Justér målene specifikt for denne uge. Det overskriver kun her — forløbet i biblioteket ændres ikke.';
+  } else {
+    sub.textContent = 'Vælg de Fælles Mål der gælder for denne uge.';
+  }
+  renderPicker('week-picker', weekPickerState);
+  modalWeekMål.classList.add('open');
+}
+
+document.getElementById('week-cancel').addEventListener('click', () => modalWeekMål.classList.remove('open'));
+modalWeekMål.addEventListener('click', (e) => { if (e.target === modalWeekMål) modalWeekMål.classList.remove('open'); });
+
+document.getElementById('week-save').addEventListener('click', () => {
+  if (pickerWeekIdx == null) return;
+  const chosen = Array.from(weekPickerState.selected);
+  const w = weeks[pickerWeekIdx];
+  // If the chosen mål matches the forløb's default, clear override
+  if (w.content?.type === 'forløb') {
+    const f = library.find(l => l.id === w.content.id);
+    const def = (f?.fællesMål || []);
+    const same = def.length === chosen.length && def.every(x => chosen.includes(x));
+    w.fællesMålOverride = same ? null : chosen;
+  } else {
+    w.fællesMålOverride = chosen;
+  }
+  renderWeekMål(pickerWeekIdx);
+  modalWeekMål.classList.remove('open');
+});
+
+document.getElementById('week-reset').addEventListener('click', () => {
+  if (pickerWeekIdx == null) return;
+  weeks[pickerWeekIdx].fællesMålOverride = null;
+  renderWeekMål(pickerWeekIdx);
+  modalWeekMål.classList.remove('open');
+});
+
+//------------------------------------------------------
+// PDF EXPORT
+//------------------------------------------------------
+
+function buildPdfHtml() {
+  const fag = document.getElementById('cfg-fag').value;
+  const klasse = document.getElementById('cfg-klasse').value;
+  const year = document.getElementById('cfg-year').value;
+  const dato = new Date().toLocaleDateString('da-DK', { day:'numeric', month:'long', year:'numeric' });
+
+  let html = `
+    <div class="pdf-header">
+      <div class="pdf-title">Årsplan · ${escapeHtml(fag)} · ${escapeHtml(klasse)}</div>
+      <div class="pdf-sub">
+        <span><strong>Skoleår:</strong> ${year}/${parseInt(year)+1}</span>
+        <span><strong>Uger:</strong> ${weeks[0]?.uge}–${weeks[weeks.length-1]?.uge}</span>
+        <span><strong>Udskrevet:</strong> ${dato}</span>
+      </div>
+    </div>
+  `;
+
+  weeks.forEach((w, idx) => {
+    const mål = getWeekMål(idx);
+    let contentHtml = '<div class="pdf-empty">— Ingen aktivitet planlagt</div>';
+    if (w.content) {
+      if (w.content.type === 'forløb') {
+        const f = library.find(l => l.id === w.content.id);
+        if (f) {
+          const tag = `<span class="pdf-fag-tag" style="background:${fagColor(f.fag)}">${escapeHtml(f.fag)}</span>`;
+          contentHtml = `
+            <div class="pdf-content-title">${tag}${escapeHtml(f.title)}</div>
+            <div class="pdf-content-desc">${escapeHtml(f.beskrivelse)}</div>
+          `;
+        }
+      } else if (w.content.type === 'tekst') {
+        contentHtml = `<div class="pdf-content-desc">${escapeHtml(w.content.text)}</div>`;
+      }
+    }
+    const uvm = mål.length 
+      ? `<div class="pdf-uvm">${mål.map(m => `<span class="pdf-uvm-tag">${escapeHtml(m)}</span>`).join('')}</div>`
+      : '';
+    html += `
+      <div class="pdf-week">
+        <div>
+          <div class="pdf-week-label">Uge</div>
+          <div class="pdf-week-num">${w.uge}</div>
+          <div class="pdf-week-dates">${formatDateRange(w.mon, w.fri)}<br>${w.year}</div>
+        </div>
+        <div class="pdf-week-body">
+          ${uvm}
+          ${contentHtml}
+        </div>
+      </div>
+    `;
+  });
+  return html;
+}
+
+document.getElementById('btn-export').addEventListener('click', async () => {
+  const pdfEl = document.getElementById('pdf-container');
+  pdfEl.innerHTML = buildPdfHtml();
+  const klasse = document.getElementById('cfg-klasse').value;
+  const fag = document.getElementById('cfg-fag').value;
+  const filename = `Aarsplan_${fag}_${klasse}.pdf`.replace(/\//g,'-').replace(/\s+/g,'_');
+
+  const opts = {
+    margin: 0, filename,
+    image: { type:'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
+    pagebreak: { mode:['css','legacy'] }
+  };
+
+  const btn = document.getElementById('btn-export');
+  const orig = btn.textContent;
+  btn.textContent = 'Genererer…';
+  btn.disabled = true;
+  try {
+    await html2pdf().set(opts).from(pdfEl).save();
+  } catch(err) {
+    console.error(err);
+    alert('Kunne ikke generere PDF: ' + err.message);
+  }
+  btn.textContent = orig;
+  btn.disabled = false;
+});
+
+//------------------------------------------------------
+// WIRE UP
+//------------------------------------------------------
+
+document.getElementById('btn-generate').addEventListener('click', generateWeeks);
+document.getElementById('cfg-fag').addEventListener('change', () => {
+  expandedFag = document.getElementById('cfg-fag').value;
+  updateMeta();
+  renderWeeks();
+  renderLibrary();
+});
+document.getElementById('cfg-klasse').addEventListener('input', updateMeta);
+
+expandedFag = document.getElementById('cfg-fag').value;
+renderLibrary();
+generateWeeks();
+</script>
+
+</body>
+</html>

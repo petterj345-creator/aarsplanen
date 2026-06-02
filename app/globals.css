@@ -1,26 +1,321 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   Årsplanen design tokens — matched to public/aarsplan-demo.html
+------------------------------------------------------------------ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f2ede2;
+  --surface: #faf7ef;
+  --surface-2: #ede7d6;
+  --ink: #1c1b17;
+  --ink-2: #5c574c;
+  --ink-3: #8b8472;
+  --line: #d9d2bd;
+  --line-2: #bfb69d;
+  --accent: #1f4e5f;
+  --accent-light: #d5e2e2;
+  --accent-2: #163e4d;
+  --rust: #b8442c;
+  --radius: 6px;
+  --radius-lg: 10px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-accent: var(--accent);
+  --font-serif: var(--font-fraunces);
+  --font-sans: var(--font-manrope);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-manrope), "Manrope", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.serif {
+  font-family: var(--font-fraunces), "Fraunces", serif;
+}
+
+/* ---------- Shared site header ---------- */
+.site-header {
+  border-bottom: 1px solid var(--line);
+  padding: 22px 36px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.logo-mark {
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-decoration: none;
+}
+.logo-tag {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 11px 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  line-height: 1.2;
+}
+.btn:hover {
+  background: var(--surface-2);
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--surface);
+  border-color: var(--accent);
+}
+.btn-primary:hover {
+  background: var(--accent-2);
+}
+.btn-lg {
+  padding: 13px 26px;
+  font-size: 15px;
+}
+
+/* ---------- Landing ---------- */
+.hero {
+  padding: 88px 36px 72px;
+  max-width: 920px;
+  margin: 0 auto;
+  text-align: center;
+}
+.hero-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+.hero-title {
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-size: clamp(38px, 6vw, 62px);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  margin: 0 0 22px;
+  color: var(--ink);
+}
+.hero-lead {
+  font-size: clamp(16px, 2.2vw, 19px);
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 620px;
+  margin: 0 auto 34px;
+}
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.hero-note {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+/* ---------- Feature grid ---------- */
+.features {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 24px 36px 96px;
+}
+.features-head {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.features-head h2 {
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+}
+.features-head p {
+  color: var(--ink-2);
+  font-size: 15px;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px;
+}
+.feature-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 26px 24px;
+  transition: all 0.18s;
+}
+.feature-card:hover {
+  border-color: var(--line-2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(28, 27, 23, 0.06);
+}
+.feature-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.feature-card h3 {
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+.feature-card p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: 26px 36px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-top: auto;
+}
+
+/* ---------- Login ---------- */
+.login-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+}
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 36px 36px 32px;
+  box-shadow: 0 12px 40px rgba(28, 27, 23, 0.07);
+}
+.login-card h1 {
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+.login-sub {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  margin: 0 0 26px;
+  line-height: 1.5;
+}
+.login-field {
+  margin-bottom: 16px;
+}
+.login-field label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.login-field input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 11px 13px;
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.login-field input:focus {
+  border-color: var(--accent);
+}
+.login-submit {
+  width: 100%;
+  margin-top: 6px;
+}
+.login-meta {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.login-meta a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.login-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-2);
+  text-decoration: none;
+  margin-bottom: 22px;
+}
+.login-back:hover {
+  color: var(--ink);
 }
