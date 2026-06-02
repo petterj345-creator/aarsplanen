@@ -360,6 +360,7 @@
   .fag-musik { background: #7A4E7B; }
   .fag-billedkunst { background: #B85B7C; }
   .fag-tværfagligt { background: #5C574C; }
+  .fag-alternativt { background: #5A6E78; }
   
   /* WEEKS AREA */
   .weeks {
@@ -890,6 +891,7 @@
           <option value="Musik">Musik</option>
           <option value="Billedkunst">Billedkunst</option>
           <option value="Tværfagligt">Tværfagligt</option>
+          <option value="Alternativt">Alternativt (ferier, emneuger m.m.)</option>
         </select>
       </div>
       <div>
@@ -1107,12 +1109,14 @@ const fællesMålData = {
 const fagClass = (fag) => ({
   'Dansk':'fag-dansk','Matematik':'fag-matematik','Engelsk':'fag-engelsk',
   'Historie':'fag-historie','N/T':'fag-nt','Idræt':'fag-idræt',
-  'Musik':'fag-musik','Billedkunst':'fag-billedkunst','Tværfagligt':'fag-tværfagligt'
+  'Musik':'fag-musik','Billedkunst':'fag-billedkunst','Tværfagligt':'fag-tværfagligt',
+  'Alternativt':'fag-alternativt'
 }[fag] || 'fag-tværfagligt');
 const fagColor = (fag) => ({
   'Dansk':'#B8442C','Matematik':'#2C5F7A','Engelsk':'#6B7F3C',
   'Historie':'#A07F2D','N/T':'#3E7F70','Idræt':'#C46A3A',
-  'Musik':'#7A4E7B','Billedkunst':'#B85B7C','Tværfagligt':'#5C574C'
+  'Musik':'#7A4E7B','Billedkunst':'#B85B7C','Tværfagligt':'#5C574C',
+  'Alternativt':'#5A6E78'
 }[fag] || '#5C574C');
 
 //------------------------------------------------------
@@ -1149,10 +1153,16 @@ let library = [
     fællesMål:['Geometri & måling', 'Figurer og egenskaber', 'Areal og omkreds'] },
   { id: 10, title:'Statistik fra hverdagen', fag:'Matematik', uger:2,
     beskrivelse:'Indsamling og bearbejdning af egne data. Diagrammer, gennemsnit og median.',
-    fællesMål:['Statistik & sandsynlighed', 'Diagrammer og grafer', 'Gennemsnit, typetal og median'] }
+    fællesMål:['Statistik & sandsynlighed', 'Diagrammer og grafer', 'Gennemsnit, typetal og median'] },
+  { id: 11, title:'Efterårsferie', fag:'Alternativt', uger:1,
+    beskrivelse:'Skolefri — ingen undervisning denne uge.',
+    fællesMål:[] },
+  { id: 12, title:'Emneuge', fag:'Alternativt', uger:1,
+    beskrivelse:'Tværgående emneuge på tværs af fag — f.eks. trivsel, motion og bevægelse eller projektarbejde.',
+    fællesMål:[] }
 ];
 
-let nextId = 11;
+let nextId = 13;
 let weeks = [];
 let editingId = null;
 let pickerWeekIdx = null;
@@ -1321,7 +1331,7 @@ function renderLibrary() {
   list.innerHTML = '';
 
   // Standard fag-rækkefølge — viser alle fag, også dem uden forløb endnu
-  const fagOrder = ['Dansk', 'Matematik', 'Engelsk', 'Historie', 'N/T', 'Idræt', 'Musik', 'Billedkunst', 'Tværfagligt'];
+  const fagOrder = ['Dansk', 'Matematik', 'Engelsk', 'Historie', 'N/T', 'Idræt', 'Musik', 'Billedkunst', 'Tværfagligt', 'Alternativt'];
 
   fagOrder.forEach(fag => {
     const forløbForFag = library.filter(l => l.fag === fag);
@@ -1806,7 +1816,7 @@ document.getElementById('cfg-fag').addEventListener('change', () => {
 });
 document.getElementById('cfg-klasse').addEventListener('input', updateMeta);
 
-expandedFag = document.getElementById('cfg-fag').value;
+expandedFag = null;
 renderLibrary();
 generateWeeks();
 </script>
