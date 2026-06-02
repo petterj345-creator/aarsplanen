@@ -42,6 +42,19 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
+    position: relative;
+  }
+  .header-credit {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink-3);
+    white-space: nowrap;
+    pointer-events: none;
   }
   .logo { display: flex; align-items: baseline; gap: 12px; }
   .logo-mark {
@@ -811,6 +824,7 @@
     <span class="logo-mark">Årsplanen</span>
     <span class="logo-tag">demo · v2</span>
   </div>
+  <div class="header-credit">Created by Mikkel Ejlersen</div>
   <div class="header-meta">Skoleåret 2025/26</div>
 </header>
 
