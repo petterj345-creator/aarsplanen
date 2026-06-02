@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { Lora, Manrope } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const lora = Lora({
+  variable: "--font-lora",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const manrope = Manrope({
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="da"
-      className={`${fraunces.variable} ${manrope.variable} h-full antialiased`}
+      className={`${lora.variable} ${manrope.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

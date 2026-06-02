@@ -36,7 +36,7 @@ export default function Home() {
         <section className="hero">
           <span className="hero-eyebrow">Årsplaner uden besværet</span>
           <h1 className="hero-title">
-            Planlæg hele skoleåret på en eftermiddag
+            Planlæg <em>hele skoleåret</em> på en eftermiddag
           </h1>
           <p className="hero-lead">
             Årsplanen er værktøjet til lærere, der vil bygge en overskuelig
@@ -48,13 +48,16 @@ export default function Home() {
             <Link href="/login" className="btn btn-primary btn-lg">
               Log ind og kom i gang
             </Link>
+            <a href="#features" className="btn btn-lg">
+              Se funktionerne
+            </a>
           </div>
           <p className="hero-note">
             Ingen installation — alt foregår i browseren.
           </p>
         </section>
 
-        <section className="features">
+        <section className="features" id="features">
           <div className="features-head">
             <h2 className="serif">Alt du skal bruge til årsplanen</h2>
             <p>Fra tom kalender til færdig, delbar plan — i ét overblik.</p>

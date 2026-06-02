@@ -18,6 +18,15 @@
   --rust: #b8442c;
   --radius: 6px;
   --radius-lg: 10px;
+
+  /* Lively multi-accent palette for the landing page */
+  --teal: #1f4e5f;
+  --teal-light: #d5e2e2;
+  --amber: #bf7d18;
+  --amber-light: #f4e6c6;
+  --green: #3f7d5c;
+  --green-light: #d8e8de;
+  --rust-light: #f4ddd4;
 }
 
 @theme inline {
@@ -25,7 +34,7 @@
   --color-surface: var(--surface);
   --color-ink: var(--ink);
   --color-accent: var(--accent);
-  --font-serif: var(--font-fraunces);
+  --font-serif: var(--font-lora);
   --font-sans: var(--font-manrope);
 }
 
@@ -37,6 +46,7 @@ html,
 body {
   background: var(--bg);
   color: var(--ink);
+  overflow-x: hidden;
 }
 
 body {
@@ -46,7 +56,7 @@ body {
 }
 
 .serif {
-  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-family: var(--font-lora), "Lora", serif;
 }
 
 /* ---------- Shared site header ---------- */
@@ -64,7 +74,7 @@ body {
   gap: 12px;
 }
 .logo-mark {
-  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-family: var(--font-lora), "Lora", serif;
   font-size: 26px;
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -101,12 +111,15 @@ body {
   background: var(--surface-2);
 }
 .btn-primary {
-  background: var(--accent);
-  color: var(--surface);
-  border-color: var(--accent);
+  background: linear-gradient(120deg, var(--teal), var(--green));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--teal) 30%, transparent);
 }
 .btn-primary:hover {
-  background: var(--accent-2);
+  background: linear-gradient(120deg, var(--accent-2), var(--green));
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--teal) 40%, transparent);
+  transform: translateY(-1px);
 }
 .btn-lg {
   padding: 13px 26px;
@@ -115,31 +128,73 @@ body {
 
 /* ---------- Landing ---------- */
 .hero {
-  padding: 88px 36px 72px;
+  position: relative;
+  padding: 92px 36px 76px;
   max-width: 920px;
   margin: 0 auto;
   text-align: center;
+  z-index: 0;
+}
+/* Soft coloured glows floating behind the hero for a lively, premium feel */
+.hero::before,
+.hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  z-index: -1;
+  pointer-events: none;
+}
+.hero::before {
+  width: 520px;
+  height: 520px;
+  top: -120px;
+  left: -80px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--teal) 42%, transparent),
+    transparent 70%
+  );
+}
+.hero::after {
+  width: 460px;
+  height: 460px;
+  top: -40px;
+  right: -90px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--amber) 38%, transparent),
+    transparent 70%
+  );
 }
 .hero-eyebrow {
   display: inline-block;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: var(--accent);
-  background: var(--accent-light);
-  padding: 5px 12px;
+  color: #fff;
+  background: linear-gradient(120deg, var(--teal), var(--green));
+  padding: 6px 14px;
   border-radius: 20px;
   margin-bottom: 24px;
   font-weight: 600;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--teal) 35%, transparent);
 }
 .hero-title {
-  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-family: var(--font-lora), "Lora", serif;
   font-size: clamp(38px, 6vw, 62px);
   font-weight: 600;
   line-height: 1.04;
   letter-spacing: -0.025em;
   margin: 0 0 22px;
   color: var(--ink);
+}
+.hero-title em {
+  font-style: normal;
+  background: linear-gradient(120deg, var(--teal), var(--green) 55%, var(--amber));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 .hero-lead {
   font-size: clamp(16px, 2.2vw, 19px);
@@ -171,7 +226,7 @@ body {
   margin-bottom: 40px;
 }
 .features-head h2 {
-  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-family: var(--font-lora), "Lora", serif;
   font-size: clamp(26px, 4vw, 34px);
   font-weight: 500;
   letter-spacing: -0.02em;
@@ -187,33 +242,62 @@ body {
   gap: 18px;
 }
 .feature-card {
+  --card-accent: var(--teal);
+  --card-accent-light: var(--teal-light);
+  position: relative;
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  padding: 26px 24px;
+  padding: 28px 24px 26px;
   transition: all 0.18s;
 }
+/* Coloured top accent bar — a different colour per card */
+.feature-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: var(--card-accent);
+  opacity: 0.9;
+}
+.feature-card:nth-child(4n + 1) {
+  --card-accent: var(--teal);
+  --card-accent-light: var(--teal-light);
+}
+.feature-card:nth-child(4n + 2) {
+  --card-accent: var(--amber);
+  --card-accent-light: var(--amber-light);
+}
+.feature-card:nth-child(4n + 3) {
+  --card-accent: var(--rust);
+  --card-accent-light: var(--rust-light);
+}
+.feature-card:nth-child(4n + 4) {
+  --card-accent: var(--green);
+  --card-accent-light: var(--green-light);
+}
 .feature-card:hover {
-  border-color: var(--line-2);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(28, 27, 23, 0.06);
+  border-color: var(--card-accent);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--card-accent) 22%, transparent);
 }
 .feature-num {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: var(--accent-light);
-  color: var(--accent);
-  font-family: var(--font-fraunces), "Fraunces", serif;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--card-accent-light);
+  color: var(--card-accent);
+  font-family: var(--font-lora), "Lora", serif;
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 16px;
 }
 .feature-card h3 {
-  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-family: var(--font-lora), "Lora", serif;
   font-size: 18px;
   font-weight: 500;
   margin: 0 0 8px;
@@ -253,7 +337,7 @@ body {
   box-shadow: 0 12px 40px rgba(28, 27, 23, 0.07);
 }
 .login-card h1 {
-  font-family: var(--font-fraunces), "Fraunces", serif;
+  font-family: var(--font-lora), "Lora", serif;
   font-size: 26px;
   font-weight: 500;
   letter-spacing: -0.01em;
