@@ -30,6 +30,10 @@ const features = [
 export default function Home() {
   return (
     <>
+      {/* Landing-only aurora background (scoped here so it never shows on
+          the login page or the internal tool). */}
+      <div className="landing-bg" aria-hidden="true" />
+
       <header className="site-header">
         <div className="logo">
           <span className="logo-mark">Årsplanen</span>
