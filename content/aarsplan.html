@@ -457,6 +457,8 @@
   .fag-engelsk { background: #6B7F3C; }
   .fag-historie { background: #A07F2D; }
   .fag-nt { background: #3E7F70; }
+  .fag-naturfag { background: #2E7D5B; }
+  .fag-samfundsfag { background: #8C3F4D; }
   .fag-idræt { background: #C46A3A; }
   .fag-musik { background: #7A4E7B; }
   .fag-billedkunst { background: #B85B7C; }
@@ -938,6 +940,7 @@
       <option value="Historie">Historie</option>
       <option value="N/T">Natur/teknologi</option>
       <option value="Naturfag">Naturfag</option>
+      <option value="Samfundsfag">Samfundsfag</option>
       <option value="Idræt">Idræt</option>
       <option value="Musik">Musik</option>
       <option value="Billedkunst">Billedkunst</option>
@@ -1024,6 +1027,7 @@
           <option value="Historie">Historie</option>
           <option value="N/T">Natur/teknologi</option>
           <option value="Naturfag">Naturfag</option>
+          <option value="Samfundsfag">Samfundsfag</option>
           <option value="Idræt">Idræt</option>
           <option value="Musik">Musik</option>
           <option value="Billedkunst">Billedkunst</option>
@@ -1234,6 +1238,44 @@ const fællesMålData = {
       'Naturfaglig formidling og argumentation'
     ]
   },
+  // Samfundsfag: Fælles Mål efter 9. klassetrin (versionen med teknologiforståelse).
+  // Kompetenceområder med tilhørende færdigheds- og vidensområder.
+  'Samfundsfag': {
+    'Politik': [
+      'Demokrati',
+      'Det politiske system, retsstat og rettigheder',
+      'Politiske partier og ideologier',
+      'Medier og politik',
+      'EU og Danmark',
+      'International politik'
+    ],
+    'Økonomi': [
+      'Privatøkonomi og forbrugeradfærd',
+      'Velfærdsstater',
+      'Samfundsøkonomiske sammenhænge',
+      'Markedsøkonomi og blandingsøkonomi',
+      'Økonomisk vækst og bæredygtighed'
+    ],
+    'Sociale og kulturelle forhold': [
+      'Socialisering',
+      'Kultur',
+      'Social differentiering'
+    ],
+    'Samfundsfaglige metoder': [
+      'Undersøgelsesmetoder',
+      'Formidling',
+      'Sprog og skriftsprog',
+      'Informationssøgning',
+      'Statistik'
+    ],
+    'Digitale artefakter og teknologier i samfundet': [
+      'Teknologianalyse',
+      'Formålsanalyse',
+      'Brugsstudier',
+      'Konsekvensvurdering',
+      'Redesign'
+    ]
+  },
   'Idræt': {
     'Alsidig idrætsudøvelse': [
       'Boldspil og holdspil',
@@ -1296,13 +1338,13 @@ const fællesMålData = {
 
 const fagClass = (fag) => ({
   'Dansk':'fag-dansk','Matematik':'fag-matematik','Engelsk':'fag-engelsk','Tysk':'fag-tysk',
-  'Historie':'fag-historie','N/T':'fag-nt','Naturfag':'fag-naturfag','Idræt':'fag-idræt',
+  'Historie':'fag-historie','N/T':'fag-nt','Naturfag':'fag-naturfag','Samfundsfag':'fag-samfundsfag','Idræt':'fag-idræt',
   'Musik':'fag-musik','Billedkunst':'fag-billedkunst','Valgfag':'fag-valgfag','Tværfagligt':'fag-tværfagligt',
   'Alternativt':'fag-alternativt'
 }[fag] || 'fag-tværfagligt');
 const fagColor = (fag) => ({
   'Dansk':'#B8442C','Matematik':'#2C5F7A','Engelsk':'#6B7F3C','Tysk':'#3F4E8F',
-  'Historie':'#A07F2D','N/T':'#3E7F70','Naturfag':'#2E7D5B','Idræt':'#C46A3A',
+  'Historie':'#A07F2D','N/T':'#3E7F70','Naturfag':'#2E7D5B','Samfundsfag':'#8C3F4D','Idræt':'#C46A3A',
   'Musik':'#7A4E7B','Billedkunst':'#B85B7C','Valgfag':'#2E7E84','Tværfagligt':'#5C574C',
   'Alternativt':'#5A6E78'
 }[fag] || '#5C574C');
@@ -1558,7 +1600,7 @@ function renderLibrary() {
   }
 
   // Standard fag-rækkefølge — viser alle fag, også dem uden forløb endnu
-  const fagOrder = ['Dansk', 'Matematik', 'Engelsk', 'Tysk', 'Historie', 'N/T', 'Naturfag', 'Idræt', 'Musik', 'Billedkunst', 'Valgfag', 'Tværfagligt', 'Alternativt'];
+  const fagOrder = ['Dansk', 'Matematik', 'Engelsk', 'Tysk', 'Historie', 'N/T', 'Naturfag', 'Samfundsfag', 'Idræt', 'Musik', 'Billedkunst', 'Valgfag', 'Tværfagligt', 'Alternativt'];
 
   fagOrder.forEach(fag => {
     const forløbForFag = library.filter(l => l.fag === fag);
