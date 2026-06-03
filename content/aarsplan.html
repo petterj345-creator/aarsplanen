@@ -911,9 +911,35 @@
   }
   .pdf-empty { color: #8B8472; font-style: italic; font-size: 12px; }
   
-  @media (max-width: 1000px) {
+  /* Tablet / iPad: behold forløbsbiblioteket som en venstre-sidebar, der
+     bliver hængende øverst når man scroller — så forløb kan trækkes ind på
+     en uge uden først at scrolle helt op til biblioteket. position:sticky
+     måler mod viewporten, så det virker også når config-baren ombryder. */
+  @media (max-width: 1000px) and (min-width: 701px) {
+    .main { grid-template-columns: 240px 1fr; }
+    .library {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      max-height: 100vh;
+      padding: 18px;
+    }
+    .weeks { max-height: none; overflow-y: visible; }
+  }
+
+  /* Telefon: stabl, men hold biblioteket fastgjort øverst, så det stadig
+     er synligt og kan bruges mens man scroller ned gennem ugerne. */
+  @media (max-width: 700px) {
     .main { grid-template-columns: 1fr; }
-    .library { max-height: 380px; border-right: none; border-bottom: 1px solid var(--line); }
+    .library {
+      max-height: 300px;
+      border-right: none;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--surface);
+    }
     .weeks { max-height: none; }
   }
 </style>
