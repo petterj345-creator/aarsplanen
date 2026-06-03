@@ -1838,6 +1838,21 @@ function updateMeta() {
   document.getElementById('plan-meta').innerHTML = `Uge ${startUge} – ${slutUge} · <strong>${placed} ${placed === 1 ? 'uge planlagt' : 'uger planlagt'}</strong> af ${weeks.length}`;
 }
 
+// Advarsel før gem/eksport hvis nogle uger mangler indhold. Brugeren kan
+// stadig fortsætte (OK) — det er kun en påmindelse om, at planen ikke er færdig.
+function confirmUnplannedWeeks(verb) {
+  const missing = weeks.filter(w => !w.content);
+  if (!missing.length) return true;
+  const uger = missing.map(w => w.uge);
+  const preview = uger.slice(0, 12).join(', ') + (uger.length > 12 ? ' …' : '');
+  const n = missing.length;
+  const msg =
+    `Du har ${n} ${n === 1 ? 'uge' : 'uger'} uden indhold (uge ${preview}).\n\n` +
+    `Du kan stadig ${verb}, men din årsplan er ikke helt færdig.\n\n` +
+    `Tryk OK for at ${verb} alligevel, eller Annullér for at gå tilbage og udfylde dem.`;
+  return confirm(msg);
+}
+
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -2081,6 +2096,7 @@ document.getElementById('btn-export').addEventListener('click', async () => {
     alert('Generér uger først, før du kan eksportere en PDF.');
     return;
   }
+  if (!confirmUnplannedWeeks('eksportere')) return;
   const pdfEl = document.getElementById('pdf-container');
   pdfEl.innerHTML = buildPdfHtml();
   const klasse = document.getElementById('cfg-klasse').value;
@@ -2306,6 +2322,7 @@ async function openPlan(id) {
 }
 
 async function savePlan() {
+  if (!confirmUnplannedWeeks('gemme')) return;
   const saveBtn = document.getElementById('btn-save-plan');
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Gemmer…'; }
   try {
@@ -2342,6 +2359,7 @@ async function savePlan() {
 }
 
 async function savePlanAs() {
+  if (!confirmUnplannedWeeks('gemme')) return;
   const base = currentPlanTitle
     ? currentPlanTitle + ' (kopi)'
     : autoPlanTitle(
